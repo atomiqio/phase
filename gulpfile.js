@@ -25,7 +25,7 @@ var paths = {
   test: 'dist/test/**/*.js'
 }
 
-gulp.task('default', ['watch']);
+gulp.task('default', ['mocha', 'watch']);
 
 gulp.task('babel', function () {
   return gulp.src(paths.src)
