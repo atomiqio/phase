@@ -4,6 +4,17 @@ import { join } from 'path';
 import { readdirSync, readFileSync } from 'fs';
 import {Phase} from '..';
 
+// PLACEHOLDER FOR HENRY'S PHASE6 UNTIL WE CAN IMPORT
+const Phase6 = () => {
+  return { validate: () => { throw new Error('not implemented yet'); }};
+};
+
+const schemaTypes = [
+  { name: 'phase', factory: Phase, ext: '.phase' },
+  { name: 'phase6', factory: Phase6, ext: '.phase6' }
+];
+
+
 const samplesPath = join(__dirname, './samples');
 /*
 
@@ -52,25 +63,28 @@ function* loadSample(sample, testType) {
 
 
 
-for (let ext of [ '.phase', '.js' ]) {
-  for (let sample of loadSamples(ext)) {
+for (let {name, factory, ext} of schemaTypes) {
 
-    it (sample.test.name, () => {
-      console.log(sample.test.name);
-      console.log(sample.test.data);
-      let phase = new Phase(sample.phase.text, { file: sample.phase.phasePath });
+  describe(name, function() {
+    for (let sample of loadSamples(ext)) {
 
-      let shouldPass = sample.test.testType == 'pass';
-      let result = phase.validate(sample.test.data);
+      it (sample.test.name, () => {
+	console.log(sample.test.name);
+	console.log(sample.test.data);
+	let phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
 
-      if (shouldPass) {
-	console.log('should pass');
-	assert(!result.errors, 'test was expected to pass!');
-      } else {
-	console.log('should fail');
-	assert(result.errors, 'test was expected to fail!');
-      }
+	let shouldPass = sample.test.testType == 'pass';
+	let result = phaser.validate(sample.test.data);
 
-    });
-  }
+	if (shouldPass) {
+	  console.log('should pass');
+	  assert(!result.errors, 'test was expected to pass!');
+	} else {
+	  console.log('should fail');
+	  assert(result.errors, 'test was expected to fail!');
+	}
+
+      });
+    }
+  });
 };
