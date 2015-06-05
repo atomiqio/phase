@@ -1,0 +1,38 @@
+{
+  "name": "@atomiq/phase",
+  "version": "0.0.1",
+  "description": "Simple DSL parser, with hooks for decorators implemented in JavaScript, for generating JSON Schema.",
+  "main": "index.js",
+  "scripts": {
+    "src-test": "mocha --compilers js:babel/register src/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atomiq/jsschema.git"
+  },
+  "keywords": [
+    "JSON",
+    "schema"
+  ],
+  "author": "Tony Pujals <tony@subfuzion.com> (http://twitter.com/subfuzion)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/atomiq/phase/issues"
+  },
+  "homepage": "https://github.com/atomiq/phase#readme",
+  "dependencies": {
+    "@atomiq/promisify": "0.0.4",
+    "babel-runtime": "^5.4.7",
+    "pegjs": "^0.8.0"
+  },
+  "devDependencies": {
+    "babel": "^5.4.7",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.1.0",
+    "gulp-concat": "^2.5.2",
+    "gulp-mocha": "^2.1.0",
+    "gulp-peg": "^0.1.2",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-util": "^3.0.5"
+  }
+}
