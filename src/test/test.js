@@ -1,12 +1,10 @@
-"use strict"
+import promisify from '@atomiq/promisify';
+import assert from 'assert';
+import { join } from 'path';
+import { readdirSync, readFileSync } from 'fs';
+import {Phase} from '..';
 
-const promisify = require('@atomiq/promisify');
-const assert = require('assert');
-const path = require('path');
-const fs = promisify(require('fs'));
-const samplesPath = path.join(__dirname, './samples');
-const Phase = require('..').Phase;
-
+const samplesPath = join(__dirname, './samples');
 /*
 
   samples/
@@ -24,14 +22,14 @@ const Phase = require('..').Phase;
 */
 
 function* loadSamples() {
-  const samples = fs.readdirSync(samplesPath);
+  const samples = readdirSync(samplesPath);
   for (const sample of samples) {
-    let samplePath = path.join(samplesPath, sample);
-    let phaseName = fs.readdirSync(samplePath).filter(f => f.endsWith('.phase'))[0];
+    let samplePath = join(samplesPath, sample);
+    let phaseName = readdirSync(samplePath).filter(f => f.endsWith('.phase'))[0];
     if (!phaseName) continue;
 
-    let phasePath = path.join(samplePath, phaseName);
-    let phase = fs.readFileSync(phasePath, 'utf8');
+    let phasePath = join(samplePath, phaseName);
+    let phase = readFileSync(phasePath, 'utf8');
     let s = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
 
     for (let testType of ['pass', 'fail']) {
@@ -43,11 +41,11 @@ function* loadSamples() {
 }
 
 function* loadSample(sample, testType) {
-  let testTypePath = path.join(sample.path, testType);
-  let tests = fs.readdirSync(testTypePath);
+  let testTypePath = join(sample.path, testType);
+  let tests = readdirSync(testTypePath);
   for (let test of tests) {
-    let testPath = path.join(testTypePath, test);
-    let testData = JSON.parse(fs.readFileSync(testPath, 'utf8'));
+    let testPath = join(testTypePath, test);
+    let testData = JSON.parse(readFileSync(testPath, 'utf8'));
     yield { path: testPath, testType: testType, name: test, data: testData };
   }
 }
