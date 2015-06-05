@@ -66,11 +66,19 @@ function* loadSample(sample, testType) {
 for (let {name, factory, ext} of schemaTypes) {
 
   describe(name, function() {
-    for (let sample of loadSamples(ext)) {
+    before(() => {
+      // just to make the test suites a little easier to distinguish in the console
+      console.log('===================');
+    });
 
-      it (sample.test.name, () => {
-	console.log(sample.test.name);
+    for (let sample of loadSamples(ext)) {
+      let testName = sample.test.name.substring(0, sample.test.name.indexOf('.json'));
+
+      it (testName, () => {
+	console.log('\n%s', testName);
+	console.log(sample.test.path);
 	console.log(sample.test.data);
+
 	let phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
 
 	let shouldPass = sample.test.testType == 'pass';
@@ -86,5 +94,11 @@ for (let {name, factory, ext} of schemaTypes) {
 
       });
     }
+
   });
 };
+
+after(() => {
+  console.log('Summary');
+  console.log('===================');
+});
