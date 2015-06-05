@@ -21,11 +21,11 @@ const samplesPath = join(__dirname, './samples');
 
 */
 
-function* loadSamples() {
+function* loadSamples(ext) {
   const samples = readdirSync(samplesPath);
   for (const sample of samples) {
     let samplePath = join(samplesPath, sample);
-    let phaseName = readdirSync(samplePath).filter(f => f.endsWith('.phase'))[0];
+    let phaseName = readdirSync(samplePath).filter(f => f.endsWith(ext))[0];
     if (!phaseName) continue;
 
     let phasePath = join(samplePath, phaseName);
@@ -52,25 +52,25 @@ function* loadSample(sample, testType) {
 
 
 
-for (let sample of loadSamples()) {
+for (let ext of [ '.phase', '.js' ]) {
+  for (let sample of loadSamples(ext)) {
 
-  it (sample.test.name, () => {
-    console.log(sample.test.name);
-    console.log(sample.test.data);
-    let phase = new Phase(sample.phase.text, { file: sample.phase.phasePath });
+    it (sample.test.name, () => {
+      console.log(sample.test.name);
+      console.log(sample.test.data);
+      let phase = new Phase(sample.phase.text, { file: sample.phase.phasePath });
 
-    let shouldPass = sample.test.testType == 'pass';
-    let result = phase.validate(sample.test.data);
+      let shouldPass = sample.test.testType == 'pass';
+      let result = phase.validate(sample.test.data);
 
-    if (shouldPass) {
-      console.log('should pass');
-      assert(!result.errors, 'test was expected to pass!');
-    } else {
-      console.log('should fail');
-      assert(result.errors, 'test was expected to fail!');
-    }
+      if (shouldPass) {
+	console.log('should pass');
+	assert(!result.errors, 'test was expected to pass!');
+      } else {
+	console.log('should fail');
+	assert(result.errors, 'test was expected to fail!');
+      }
 
-  });
-
-}
-
+    });
+  }
+};
