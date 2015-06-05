@@ -24,18 +24,18 @@ const Phase = require('..').Phase;
 */
 
 function* loadSamples() {
-  let samples = fs.readdirSync(samplesPath);
-  for (let sample of samples) {
+  const samples = fs.readdirSync(samplesPath);
+  for (const sample of samples) {
     let samplePath = path.join(samplesPath, sample);
     let phaseName = fs.readdirSync(samplePath).filter(f => f.endsWith('.phase'))[0];
     if (!phaseName) continue;
 
     let phasePath = path.join(samplePath, phaseName);
     let phase = fs.readFileSync(phasePath, 'utf8');
-    let sample = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
+    let s = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
 
     for (let testType of ['pass', 'fail']) {
-      for (let test of loadSample(sample, testType)) {
+      for (let test of loadSample(s, testType)) {
         yield { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase }, test: test };
       }
     }

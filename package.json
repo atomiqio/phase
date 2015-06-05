@@ -4,7 +4,7 @@
   "description": "Simple DSL parser, with hooks for decorators implemented in JavaScript, for generating JSON Schema.",
   "main": "index.js",
   "scripts": {
-    "src-test": "mocha --compilers js:babel/register src/test"
+    "test": "mocha dist/test"
   },
   "repository": {
     "type": "git",

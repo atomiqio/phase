@@ -29,7 +29,7 @@ var Phase = require('..').Phase;
 */
 
 function loadSamples() {
-  var samples, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, sample, samplePath, phaseName, phasePath, phase, _arr, _i, testType, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, test;
+  var samples, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, sample, samplePath, phaseName, phasePath, phase, s, _arr, _i, testType, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, test;
 
   return _regeneratorRuntime.wrap(function loadSamples$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
@@ -63,7 +63,7 @@ function loadSamples() {
       case 12:
         phasePath = path.join(samplePath, phaseName);
         phase = fs.readFileSync(phasePath, 'utf8');
-        sample = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
+        s = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
         _arr = ['pass', 'fail'];
         _i = 0;
 
@@ -78,7 +78,7 @@ function loadSamples() {
         _didIteratorError2 = false;
         _iteratorError2 = undefined;
         context$1$0.prev = 22;
-        _iterator2 = _getIterator(loadSample(sample, testType));
+        _iterator2 = _getIterator(loadSample(s, testType));
 
       case 24:
         if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
