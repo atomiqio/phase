@@ -12,8 +12,8 @@ const Phase6 = () => {
 };
 
 const schemaTypes = [
-  { name: 'phase', factory: Phase, ext: '.phase' },
-  { name: 'phase6', factory: Phase6, ext: '.phase6', skip: true }
+  { name: 'phase', factory: Phase, ext: '.phase', skip: process.env.SKIP_PHASE },
+  { name: 'phase6', factory: Phase6, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
 
