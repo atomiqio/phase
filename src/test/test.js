@@ -4,14 +4,16 @@ import { join } from 'path';
 import { readdirSync, readFileSync } from 'fs';
 import {Phase} from '..';
 
+const prn = console.log;
+
 // PLACEHOLDER FOR HENRY'S PHASE6 UNTIL WE CAN IMPORT
 const Phase6 = () => {
   return { validate: () => { throw new Error('not implemented yet'); }};
 };
 
 const schemaTypes = [
-  { name: 'phase', factory: Phase, ext: '.phase' },
-  { name: 'phase6', factory: Phase6, ext: '.phase6' }
+  { name: 'phase', factory: Phase, ext: '.phase', skip: process.env.SKIP_PHASE },
+  { name: 'phase6', factory: Phase6, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
 
@@ -35,16 +37,16 @@ const samplesPath = join(__dirname, './samples');
 function* loadSamples(ext) {
   const samples = readdirSync(samplesPath);
   for (const sample of samples) {
-    let samplePath = join(samplesPath, sample);
-    let phaseName = readdirSync(samplePath).filter(f => f.endsWith(ext))[0];
+    const samplePath = join(samplesPath, sample);
+    const phaseName = readdirSync(samplePath).filter(f => f.endsWith(ext))[0];
     if (!phaseName) continue;
 
-    let phasePath = join(samplePath, phaseName);
-    let phase = readFileSync(phasePath, 'utf8');
-    let s = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
+    const phasePath = join(samplePath, phaseName);
+    const phase = readFileSync(phasePath, 'utf8');
+    const s = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
 
-    for (let testType of ['pass', 'fail']) {
-      for (let test of loadSample(s, testType)) {
+    for (const testType of ['pass', 'fail']) {
+      for (const test of loadSample(s, testType)) {
         yield { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase }, test: test };
       }
     }
@@ -52,43 +54,45 @@ function* loadSamples(ext) {
 }
 
 function* loadSample(sample, testType) {
-  let testTypePath = join(sample.path, testType);
-  let tests = readdirSync(testTypePath);
-  for (let test of tests) {
-    let testPath = join(testTypePath, test);
-    let testData = JSON.parse(readFileSync(testPath, 'utf8'));
+  const testTypePath = join(sample.path, testType);
+  const tests = readdirSync(testTypePath);
+
+  for (const test of tests) {
+    const testPath = join(testTypePath, test);
+    const testData = JSON.parse(readFileSync(testPath, 'utf8'));
     yield { path: testPath, testType: testType, name: test, data: testData };
   }
 }
 
 
 
-for (let {name, factory, ext} of schemaTypes) {
+for (let { name, factory, ext, skip } of schemaTypes) {
+  if (skip) continue;
 
-  describe(name, function() {
+  describe(name, () => {
     before(() => {
       // just to make the test suites a little easier to distinguish in the console
-      console.log('===================');
+      prn('===================');
     });
 
-    for (let sample of loadSamples(ext)) {
-      let testName = sample.test.name.substring(0, sample.test.name.indexOf('.json'));
+    for (const sample of loadSamples(ext)) {
+      const testName = sample.test.name.substring(0, sample.test.name.indexOf('.json'));
 
       it (testName, () => {
-	console.log('\n%s', testName);
-	console.log(sample.test.path);
-	console.log(sample.test.data);
+	prn('\n%s', testName);
+	prn(sample.test.path);
+	prn(sample.test.data);
 
-	let phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
+	const phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
 
-	let shouldPass = sample.test.testType == 'pass';
-	let result = phaser.validate(sample.test.data);
+	const shouldPass = sample.test.testType == 'pass';
+	const result = phaser.validate(sample.test.data);
 
 	if (shouldPass) {
-	  console.log('should pass');
+	  prn('should pass');
 	  assert(!result.errors, 'test was expected to pass!');
 	} else {
-	  console.log('should fail');
+	  prn('should fail');
 	  assert(result.errors, 'test was expected to fail!');
 	}
 
@@ -99,6 +103,6 @@ for (let {name, factory, ext} of schemaTypes) {
 };
 
 after(() => {
-  console.log('Summary');
-  console.log('===================');
+  prn('Summary');
+  prn('===================');
 });
