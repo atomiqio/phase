@@ -1,5 +1,4 @@
 import { transform } from 'babel';
-import { runInThisContext } from 'vm';
 
 export class Phase6 {
 
