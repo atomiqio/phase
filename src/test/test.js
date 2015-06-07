@@ -2,21 +2,14 @@ import promisify from '@atomiq/promisify';
 import assert from 'assert';
 import { join } from 'path';
 import { readdirSync, readFileSync } from 'fs';
-import {Phase} from '..';
+import { Phase } from '../phase';
+import { Phase6 } from '../phase6';
 
 const prn = console.log;
-
-// PLACEHOLDER FOR HENRY'S PHASE6 UNTIL WE CAN IMPORT
-const Phase6 = () => {
-  return { validate: () => { throw new Error('not implemented yet'); }};
-};
-
 const schemaTypes = [
-  { name: 'phase', factory: Phase, ext: '.phase', skip: process.env.SKIP_PHASE },
-  { name: 'phase6', factory: Phase6, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
+  { name: 'phase', Factory: Phase, ext: '.phase', skip: process.env.SKIP_PHASE },
+  { name: 'phase6', Factory: Phase6, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
-
-
 const samplesPath = join(__dirname, './samples');
 /*
 
@@ -39,7 +32,7 @@ function* loadSamples(ext) {
   for (const sample of samples) {
     const samplePath = join(samplesPath, sample);
     const phaseName = readdirSync(samplePath).filter(f => f.endsWith(ext))[0];
-    if (!phaseName) continue;
+    if (!phaseName) { continue }
 
     const phasePath = join(samplePath, phaseName);
     const phase = readFileSync(phasePath, 'utf8');
@@ -50,7 +43,7 @@ function* loadSamples(ext) {
         yield { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase }, test: test };
       }
     }
-  };
+  }
 }
 
 function* loadSample(sample, testType) {
@@ -66,7 +59,7 @@ function* loadSample(sample, testType) {
 
 
 
-for (let { name, factory, ext, skip } of schemaTypes) {
+for (let { name, Factory, ext, skip } of schemaTypes) {
   if (skip) continue;
 
   describe(name, () => {
@@ -83,7 +76,7 @@ for (let { name, factory, ext, skip } of schemaTypes) {
 	prn(sample.test.path);
 	prn(sample.test.data);
 
-	const phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
+	const phaser = new Factory(sample.phase.text, { file: sample.phase.phasePath });
 
 	const shouldPass = sample.test.testType == 'pass';
 	const result = phaser.validate(sample.test.data);
@@ -100,7 +93,7 @@ for (let { name, factory, ext, skip } of schemaTypes) {
     }
 
   });
-};
+}
 
 after(() => {
   prn('Summary');
