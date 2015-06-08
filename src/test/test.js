@@ -12,8 +12,8 @@ const Phase6 = () => {
 };
 
 const schemaTypes = [
-  { name: 'phase', factory: Phase, ext: '.phase', skip: process.env.SKIP_PHASE },
-  { name: 'phase6', factory: Phase6, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
+  { name: 'phase', factory: () => { return new Phase(Array.slice(arguments)); }, ext: '.phase', skip: process.env.SKIP_PHASE },
+  { name: 'phase6', factory: () => { return new Phase6(Array.slice(arguments)); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
 
@@ -83,7 +83,7 @@ for (let { name, factory, ext, skip } of schemaTypes) {
 	prn(sample.test.path);
 	prn(sample.test.data);
 
-	const phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
+	const phaser = factory(sample.phase.text, { file: sample.phase.phasePath });
 
 	const shouldPass = sample.test.testType == 'pass';
 	const result = phaser.validate(sample.test.data);

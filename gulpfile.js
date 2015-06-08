@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var mocha = require('gulp-mocha');
+var test = require('gulp-mocha');
 var babel = require("gulp-babel");
 var sourcemaps = require('gulp-sourcemaps');
 var path = require('path');
@@ -25,7 +25,7 @@ var paths = {
   test: 'dist/test/**/*.js'
 }
 
-gulp.task('default', ['mocha', 'watch']);
+gulp.task('default', ['test', 'watch']);
 
 gulp.task('babel', function () {
   return gulp.src(paths.src)
@@ -40,12 +40,12 @@ gulp.task('dist', ['babel'], function() {
     .pipe(gulp.dest(paths.dist));
 });
 
-gulp.task('mocha', ['dist'], function() {
+gulp.task('test', ['dist'], function() {
   return gulp.src(paths.test, {read: false})
-    .pipe(mocha({ reporter: 'spec' }))
+    .pipe(test({ reporter: 'spec' }))
     ; //.on('error', gutil.log);
 });
 
 gulp.task('watch', function () {
-  gulp.watch(paths.src, ['mocha']);
+  gulp.watch(paths.src, ['test']);
 });
