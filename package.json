@@ -6,7 +6,7 @@
   "scripts": {
     "test": "gulp test",
     "test-node-0.12": "mocha dist/test -- --harmony",
-    "clean": "rm -rf dist"
+    "clean": "gulp clean"
   },
   "repository": {
     "type": "git",
@@ -36,6 +36,7 @@
     "gulp-concat": "^2.5.2",
     "gulp-mocha": "^2.1.0",
     "gulp-peg": "^0.1.2",
+    "gulp-rimraf": "^0.1.1",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.5"
   }
