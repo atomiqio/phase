@@ -52,12 +52,8 @@ const zSchemaFactory = (text, options) => {
 
   return {
     validate: json => {
-      prn('**************************');
-      console.log(text);
-      console.log(json);
       const valid = validator.validate(json, schema);
       const errors = validator.getLastErrors();
-      prn(errors);
       prn('valid: ', valid);
       return valid ? {} : { errors };
     }
@@ -72,19 +68,12 @@ const Phase6 = () => {
 
 
 
-/*
+// for a factory, text is the schema to parse and options should include at least a file property with the path to the schema
 const schemaTypes = [
   { name: 'tv4-schema', factory: (text, options) => tv4SchemaFactory(text, options), ext: '.schema.json', skip: process.env.SKIP_TV4_SCHEMA },
   { name: 'z-schema', factory: (text, options) => zSchemaFactory(text, options), ext: '.schema.json', skip: process.env.SKIP_Z_SCHEMA },
   { name: 'phase', factory: (text, options) => { return new Phase(text, options); }, ext: '.phase', skip: process.env.SKIP_PHASE },
   { name: 'phase6', factory: (text, options) => { return new Phase6(tect, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
-];
-*/
-
-
-// for a factory, text is the schema to parse and options should include at least a file property with the path to the schema
-const schemaTypes = [
-  { name: 'tv4-schema', factory: (text, options) => tv4SchemaFactory(text, options), ext: '.schema.json', skip: process.env.SKIP_TV4_SCHEMA }
 ];
 
 
