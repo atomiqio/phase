@@ -24,7 +24,9 @@
   "dependencies": {
     "@atomiq/promisify": "0.0.4",
     "babel-runtime": "^5.4.7",
-    "pegjs": "^0.8.0"
+    "pegjs": "^0.8.0",
+    "tv4": "^1.1.9",
+    "z-schema": "^3.11.0"
   },
   "devDependencies": {
     "babel": "^5.4.7",
