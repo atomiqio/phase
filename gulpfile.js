@@ -21,11 +21,12 @@ var babelOptions = {
 var paths = {
   sourceRoot: path.join(__dirname, 'src'),
   src: ['src/**/*.js'],
+  watch: ['src/**/*.js', 'src/**/*.json'],
   dist: 'dist',
   test: 'dist/test/**/*.js'
 }
 
-gulp.task('default', ['mocha', 'watch']);
+gulp.task('default', ['test', 'watch']);
 
 gulp.task('babel', function () {
   return gulp.src(paths.src)
@@ -40,12 +41,12 @@ gulp.task('dist', ['babel'], function() {
     .pipe(gulp.dest(paths.dist));
 });
 
-gulp.task('mocha', ['dist'], function() {
+gulp.task('test', ['dist'], function() {
   return gulp.src(paths.test, {read: false})
     .pipe(mocha({ reporter: 'spec' }))
     ; //.on('error', gutil.log);
 });
 
 gulp.task('watch', function () {
-  gulp.watch(paths.src, ['mocha']);
+  gulp.watch(paths.watch, ['test']);
 });
