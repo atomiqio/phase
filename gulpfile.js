@@ -3,6 +3,7 @@ var gutil = require('gulp-util');
 var mocha = require('gulp-mocha');
 var babel = require("gulp-babel");
 var sourcemaps = require('gulp-sourcemaps');
+var clean = require('gulp-rimraf');
 var path = require('path');
 
 var babelOptions = {
@@ -49,4 +50,9 @@ gulp.task('test', ['dist'], function() {
 
 gulp.task('watch', function () {
   gulp.watch(paths.watch, ['test']);
+});
+
+gulp.task('clean', function() {
+  gulp.src(paths.dist, { read: false })
+    .pipe(clean());
 });
