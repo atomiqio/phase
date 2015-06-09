@@ -1,10 +1,8 @@
 {
-  "Person": {
-    "type": "object",
-    "properties": {
-      "name": {
-        "type": "string"
-      }
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
     }
   }
 }
