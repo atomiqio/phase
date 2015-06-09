@@ -1,11 +1,9 @@
 {
-  "definitions": {
-     "Person": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
+  "Person": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
       }
     }
   }
