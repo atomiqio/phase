@@ -12,7 +12,7 @@ export class Phase6 {
       ${this.text}`, { stage: 1 }).code;
     try {
       const exports = {};
-      this.validators = eval(this.code).prototype._validators;
+      this.validator = eval(this.code);
     } catch (e) {
       console.error('Error creating validators');
       console.error(e.stack);
@@ -21,14 +21,17 @@ export class Phase6 {
 
   validate(obj) {
     const errors = [];
-    for (const property in obj) {
-      if (obj.hasOwnProperty(property)) {
-        if (!this.validators[property]) {
-          errors.push(new Error(`Unknown property: ${property}, value: ${obj[property]}`));
+    const name = this.validator.name;
+    const data = obj[name];
+    const validators = this.validator.prototype._validators;
+    for (const property in data) {
+      if (data.hasOwnProperty(property)) {
+        if (!validators[property]) {
+          errors.push(new Error(`Unknown property: ${property}, value: ${data[property]}`));
         } else {
-          for (const validator of this.validators[property]) {
-            try {
-              validator(obj, property, obj[property]);
+          for (const validator of validators[property]) { 
+           try {
+              validator(data, property, data[property]);
             } catch (error) {
               errors.push(error);
             }
