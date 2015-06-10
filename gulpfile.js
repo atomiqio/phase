@@ -29,7 +29,12 @@ var paths = {
 
 gulp.task('default', ['test', 'watch']);
 
-gulp.task('babel', function () {
+gulp.task('clean', function() {
+  return gulp.src(paths.dist, { read: false })
+      .pipe(clean());
+});
+
+gulp.task('babel', ['clean'], function () {
   return gulp.src(paths.src)
       .pipe(sourcemaps.init())
       .pipe(babel(babelOptions))
@@ -52,7 +57,3 @@ gulp.task('watch', function () {
   gulp.watch(paths.watch, ['test']);
 });
 
-gulp.task('clean', function() {
-  gulp.src(paths.dist, { read: false })
-    .pipe(clean());
-});
