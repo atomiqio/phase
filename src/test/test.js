@@ -128,7 +128,8 @@ function* loadSample(sample, testType) {
     }
   } catch (err) {
     // ignore when the directory is missing (don't always provide pass or fail test directories)
-    if (err.code != 'ENOENT') throw err;
+    // or ignore parse error if no JSON files in the test directories
+    if (err.code != 'ENOENT' && !(err instanceof SyntaxError)) throw err;
   }
 }
 
