@@ -2,29 +2,28 @@ import promisify from '@atomiq/promisify';
 import assert from 'assert';
 import { join } from 'path';
 import { readdirSync, readFileSync } from 'fs';
+import { Phase } from '../phase';
+import { Phase6 } from '../phase6';
 import tv4 from 'tv4';
 import ZSchema from 'z-schema';
-import { Phase } from '..';
 
 const prn = console.log;
 
 const samplesPath = join(__dirname, './samples');
 /*
-
  samples/
- sample-01/
- only-1-per-directory-canonical.schema.json
- only-1-per-directory.phase
- only-1-per-directory.phase6
- pass/
- sample1.json
- sample2.json
- fail/
- sample3.json
- sample4.json
- sample-02/
- ...
-
+   sample-01/
+     only-1-per-directory-canonical.schema.json
+     only-1-per-directory.phase
+     only-1-per-directory.phase6
+     pass/
+       sample1.json
+       sample2.json
+     fail/
+       sample3.json
+       sample4.json
+   sample-02/
+   ...
  */
 
 // As we process both phase and phase6 schemas, we will want to compare against canonical
@@ -59,41 +58,12 @@ const zSchemaFactory = (text, options) => {
   };
 };
 
-
-// PLACEHOLDER FOR HENRY'S PHASE6 UNTIL WE CAN IMPORT
-const Phase6 = () => {
-  return {
-    validate: () => {
-      throw new Error('not implemented yet');
-    }
-  };
-};
-
-
 // for a factory, text is the schema to parse and options should include at least a file property with the path to the schema
 const schemaTypes = [
-  {
-    name: 'tv4-schema',
-    factory: (text, options) => tv4SchemaFactory(text, options),
-    ext: '.json',
-    skip: process.env.SKIP_TV4_SCHEMA
-  },
-  {
-    name: 'z-schema',
-    factory: (text, options) => zSchemaFactory(text, options),
-    ext: '.json',
-    skip: process.env.SKIP_Z_SCHEMA
-  },
-  {
-    name: 'phase', factory: (text, options) => {
-    return new Phase(text, options);
-  }, ext: '.phase', skip: process.env.SKIP_PHASE
-  },
-  {
-    name: 'phase6', factory: (text, options) => {
-    return new Phase6(tect, options);
-  }, ext: '.phase6', skip: process.env.SKIP_PHASE6
-  }
+  { name: 'tv4-schema', factory: (text, options) => tv4SchemaFactory(text, options), ext: '.json', skip: process.env.SKIP_TV4_SCHEMA },
+  { name: 'z-schema', factory: (text, options) => zSchemaFactory(text, options), ext: '.json', skip: process.env.SKIP_Z_SCHEMA },
+  { name: 'phase', factory: (text, options) => { return new Phase(text, options); }, ext: '.phase', skip: process.env.SKIP_PHASE },
+  { name: 'phase6', factory: (text, options) => { return new Phase6(text, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
 
@@ -102,7 +72,7 @@ function* loadSamples(ext) {
   for (const sample of samples) {
     const samplePath = join(samplesPath, sample);
     const schemaFile = readdirSync(samplePath).filter(f => f.endsWith(ext))[0];
-    if (!schemaFile) continue;
+    if (!schemaFile) { continue }
 
     const schemaPath = join(samplePath, schemaFile);
     const schema = readFileSync(schemaPath, 'utf8');
@@ -164,7 +134,6 @@ for (let { name, factory, ext, skip } of schemaTypes) {
 
   });
 }
-;
 
 after(() => {
   prn('Summary');
