@@ -13,3 +13,10 @@ export const string = (target, name, descriptor) => {
     } 
   });
 };
+
+export const enumerated = values => 
+  (target, name, descriptor) => {
+    target._validators = target._validators || {};
+    target._validators[name] = target._validators[name] || [exists];
+    target._validators[name].push((object, property, value) => values.includes(value));
+  };

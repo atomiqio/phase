@@ -8,11 +8,14 @@ export class Phase6 {
   }
   
   parse() {
-    this.code = transform(`import { string } from './decorators';
+    this.code = transform(`'use strict';
+      import { string, enumerated } from './decorators';
       ${this.text}`, { stage: 1 }).code;
     try {
       const exports = {};
-      this.validator = eval(this.code);
+      console.log(this.code);
+      console.log(eval(this.code).toString());
+      this.validators = eval(this.code).prototype._validators;
     } catch (e) {
       console.error('Error creating validators');
       console.error(e.stack);
@@ -20,18 +23,18 @@ export class Phase6 {
   }
 
   validate(obj) {
+    if (!this.validators) {
+      return {};
+    }
     const errors = [];
-    const name = this.validator.name;
-    const data = obj[name];
-    const validators = this.validator.prototype._validators;
-    for (const property in data) {
-      if (data.hasOwnProperty(property)) {
-        if (!validators[property]) {
-          errors.push(new Error(`Unknown property: ${property}, value: ${data[property]}`));
+    for (const property in obj) {
+      if (obj.hasOwnProperty(property)) {
+        if (!this.validators[property]) {
+          errors.push(new Error(`Unknown property: ${property}, value: ${obj[property]}`));
         } else {
-          for (const validator of validators[property]) { 
-           try {
-              validator(data, property, data[property]);
+          for (const validator of this.validators[property]) {
+            try {
+              validator(obj, property, obj[property]);
             } catch (error) {
               errors.push(error);
             }
