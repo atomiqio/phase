@@ -1,0 +1,5 @@
+export enumeration([
+  [ 1, true, 0 ],
+  5,
+  {}
+])
