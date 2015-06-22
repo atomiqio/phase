@@ -44,9 +44,8 @@ const tv4SchemaFactory = (text, options) => {
   }
 };
 
-const zSchemaOptions = {};
 const zSchemaFactory = (text, options) => {
-  const validator = new ZSchema(zSchemaOptions);
+  const validator = new ZSchema(options);
   const schema = JSON.parse(text);
 
   return {
@@ -142,7 +141,7 @@ after(() => {
 
 
 function dump(msg, testName, sample, errors) {
-  prn('\n[X] %s: %s', msg, testName);
+  prn('\n[X] %s: %s -> %s', msg, sample.name, testName);
   prn(sample.test.path);
   prn(sample.test.data);
   prn();
