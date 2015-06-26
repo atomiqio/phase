@@ -64,50 +64,6 @@ const validators = [
   { name: 'phase6', factory: (schema, options) => { return new Phase6(schema, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
-for (let { name, factory, ext, skip } of validators) {
-  if (skip) continue;
-
-  describe(name, () => {
-    before(() => {
-      // just to make the test suites a little easier to distinguish in the console
-      prn('===================');
-    });
-
-    for (const sample of loadSamples(ext)) {
-      
-      describe(sample.group, function() {
-	describe(sample.description, () => {
-	  const phaser = factory(sample.schema);
-
-          for (const test of sample.tests) {
-	    it (test.description, function() {
-	      const result = phaser.validate(test.data);
-	      const shouldPass = test.valid;
-	    
-	      if (shouldPass) {
-		if (!result.valid) dump('expected to pass', sample, test, result);
-		assert(result.valid, 'test was expected to pass!');
-	      } else {
-		if (result.valid) dump('expected to fail', sample, test);
-		assert(!result.valid, 'test was expected to fail!');
-	      }
-
-	    });
-	  }
-
-	});
-      });
-    }
-  });
-}
-
-
-after(() => {
-  prn('Summary');
-  prn('===================');
-});
-
-
 function dump(msg, sample, test, result) {
   prn('\n[X] %s: %s', msg, sample.description);
   prn(sample.filepath);
@@ -144,4 +100,55 @@ function* loadSamples(ext) {
     yield sample;
   }
 }
+
+
+// TESTS
+
+describe('validator tests', function() {
+
+  after(() => {
+    prn('===================');
+    prn('Summary');
+    prn('===================');
+  });
+
+  for (let { name, factory, ext, skip } of validators) {
+    if (skip) continue;
+
+    describe(name, () => {
+      before(() => {
+	// just to make the test suites a little easier to distinguish in the console
+	prn('===================');
+      });
+
+
+      for (const sample of loadSamples(ext)) {
+	
+	describe(sample.group, function() {
+	  describe(sample.description, () => {
+	    const phaser = factory(sample.schema);
+
+	    for (const test of sample.tests) {
+	      it (test.description, function() {
+		const result = phaser.validate(test.data);
+		const shouldPass = test.valid;
+	      
+		if (shouldPass) {
+		  if (!result.valid) dump('expected to pass', sample, test, result);
+		  assert(result.valid, 'test was expected to pass!');
+		} else {
+		  if (result.valid) dump('expected to fail', sample, test);
+		  assert(!result.valid, 'test was expected to fail!');
+		}
+
+	      });
+	    }
+
+	  });
+	});
+      }
+    });
+  }
+
+});
 
