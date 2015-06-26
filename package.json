@@ -4,8 +4,9 @@
   "description": "Simple DSL parser, with hooks for decorators implemented in JavaScript, for generating JSON Schema.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha dist/test",
-    "test-node-0.12": "mocha dist/test -- --harmony"
+    "test": "gulp test",
+    "test-node-0.12": "mocha dist/test -- --harmony",
+    "clean": "gulp clean"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,9 @@
   "dependencies": {
     "@atomiq/promisify": "0.0.4",
     "babel-runtime": "^5.4.7",
-    "pegjs": "^0.8.0"
+    "pegjs": "^0.8.0",
+    "tv4": "^1.1.9",
+    "z-schema": "^3.11.0"
   },
   "devDependencies": {
     "babel": "^5.4.7",
@@ -33,7 +36,9 @@
     "gulp-concat": "^2.5.2",
     "gulp-mocha": "^2.1.0",
     "gulp-peg": "^0.1.2",
+    "gulp-rimraf": "^0.1.1",
     "gulp-sourcemaps": "^1.5.2",
-    "gulp-util": "^3.0.5"
+    "gulp-util": "^3.0.5",
+    "json-schema-test-suite": "0.0.8"
   }
 }

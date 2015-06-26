@@ -2,107 +2,153 @@ import promisify from '@atomiq/promisify';
 import assert from 'assert';
 import { join } from 'path';
 import { readdirSync, readFileSync } from 'fs';
-import {Phase} from '..';
+import { Phase } from '../phase';
+import { Phase6 } from '../phase6';
+import tv4 from 'tv4';
+import ZSchema from 'z-schema';
+import testSuite from './testsuite';
+import { draft4 } from 'json-schema-test-suite';
 
 const prn = console.log;
 
-// PLACEHOLDER FOR HENRY'S PHASE6 UNTIL WE CAN IMPORT
-const Phase6 = () => {
-  return { validate: () => { throw new Error('not implemented yet'); }};
+const testSuitePath = join(__dirname, './testsuite');
+
+// As we process both phase and phase6 schemas, we will want to compare against canonical
+// JSON Schemas. We will also want to ensure that the sample JSON files we use for testing
+// phase/phase6 schemas actually pass canonical JSON Schema tests (thus ensuring we are
+// actually using good test samples).
+//
+// For testing, will compare with both tv4 and z-schema (which swagger uses)
+
+const tv4SchemaFactory = (schema, options) => {
+  if (typeof schema == 'string') {
+    schema = JSON.parse(schema);
+  }
+
+  return {
+    validate: json => {
+      try {
+        const valid = tv4.validate(json, schema);
+        return valid ? { valid: true } : { valid: false, errors: [ tv4.error ] };
+      } catch (err) {
+        return { valid: false, errors: [err.message] };
+      }
+    }
+  }
 };
 
-const schemaTypes = [
-  { name: 'phase', factory: Phase, ext: '.phase', skip: process.env.SKIP_PHASE },
-  { name: 'phase6', factory: Phase6, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
-];
+const zSchemaFactory = (schema, options) => {
+  const zschema = new ZSchema(options);
 
+  if (typeof schema == 'string') {
+    schema = JSON.parse(schema);
+  }
 
-const samplesPath = join(__dirname, './samples');
-/*
-
-  samples/
-    sample-01/
-      only-1-per-directory.phase
-        pass/
-	  sample1.json
-	  sample2.json
-	fail/
-	  sample3.json
-	  sample4.json
-    sample-02/
-      ...
-
-*/
-
-function* loadSamples(ext) {
-  const samples = readdirSync(samplesPath);
-  for (const sample of samples) {
-    const samplePath = join(samplesPath, sample);
-    const phaseName = readdirSync(samplePath).filter(f => f.endsWith(ext))[0];
-    if (!phaseName) continue;
-
-    const phasePath = join(samplePath, phaseName);
-    const phase = readFileSync(phasePath, 'utf8');
-    const s = { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase } };
-
-    for (const testType of ['pass', 'fail']) {
-      for (const test of loadSample(s, testType)) {
-        yield { path: samplePath, name: sample, phase: { phasePath: phasePath, text: phase }, test: test };
+  return {
+    validate: json => {
+      try {
+        var valid = zschema.validate(json, schema);
+        return valid ? { valid: true } : { valid: false, errors: zschema.getLastErrors() };
+      } catch (err) {
+        return { valid: false, errors: [err.message] };
       }
     }
   };
-}
+};
 
-function* loadSample(sample, testType) {
-  const testTypePath = join(sample.path, testType);
-  const tests = readdirSync(testTypePath);
+// for a factory, schema is either a string or JSON object, and options is a validator-specific set of options to pass along
+const validators = [
+  { name: 'tv4-schema', factory: (schema, options) => tv4SchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_TV4_SCHEMA },
+  { name: 'z-schema', factory: (schema, options) => zSchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_Z_SCHEMA },
+  { name: 'phase', factory: (schema, options) => { return new Phase(schema, options); }, ext: '.phase', skip: process.env.SKIP_PHASE },
+  { name: 'phase6', factory: (schema, options) => { return new Phase6(schema, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
+];
 
-  for (const test of tests) {
-    const testPath = join(testTypePath, test);
-    const testData = JSON.parse(readFileSync(testPath, 'utf8'));
-    yield { path: testPath, testType: testType, name: test, data: testData };
+function dump(msg, sample, test, result) {
+  prn('\n[X] %s: %s', msg, sample.description);
+  prn(sample.filepath);
+  prn(' -> %s', test.description);
+  prn(test.data);
+  prn();
+  if (test.errors && test.errors.length) {
+    prn('errors (%d)', test.errors.length);
+    prn(test.errors);
+    prn('-----------------\n');
   }
 }
 
 
+/**
+ * Traverse the testsuite directory and yield schema objects:
+ * {
+ *   group: '',
+ *   schema: '',
+ *   description: '',
+ *   filename: '',
+ *   filepath: '',
+ *   tests: [{
+ *     description: '',
+ *     data: *,
+ *     valid: t|f
+ *   }]
+ * }
+ * 
+ */
+function* loadSamples(ext) {
+  const testsuitePath = join(__dirname, 'testsuite');
+  for (const sample of testSuite.load(testSuitePath, ext)) {
+    yield sample;
+  }
+}
 
-for (let { name, factory, ext, skip } of schemaTypes) {
-  if (skip) continue;
 
-  describe(name, () => {
-    before(() => {
-      // just to make the test suites a little easier to distinguish in the console
-      prn('===================');
-    });
+// TESTS
 
-    for (const sample of loadSamples(ext)) {
-      const testName = sample.test.name.substring(0, sample.test.name.indexOf('.json'));
+describe('validator tests', function() {
 
-      it (testName, () => {
-	prn('\n%s', testName);
-	prn(sample.test.path);
-	prn(sample.test.data);
-
-	const phaser = new factory(sample.phase.text, { file: sample.phase.phasePath });
-
-	const shouldPass = sample.test.testType == 'pass';
-	const result = phaser.validate(sample.test.data);
-
-	if (shouldPass) {
-	  prn('should pass');
-	  assert(!result.errors, 'test was expected to pass!');
-	} else {
-	  prn('should fail');
-	  assert(result.errors, 'test was expected to fail!');
-	}
-
-      });
-    }
-
+  after(() => {
+    prn('===================');
+    prn('Summary');
+    prn('===================');
   });
-};
 
-after(() => {
-  prn('Summary');
-  prn('===================');
+  for (let { name, factory, ext, skip } of validators) {
+    if (skip) continue;
+
+    describe(name, () => {
+      before(() => {
+	// just to make the test suites a little easier to distinguish in the console
+	prn('===================');
+      });
+
+
+      for (const sample of loadSamples(ext)) {
+	
+	describe(sample.group, function() {
+	  describe(sample.description, () => {
+	    const phaser = factory(sample.schema);
+
+	    for (const test of sample.tests) {
+	      it (test.description, function() {
+		const result = phaser.validate(test.data);
+		const shouldPass = test.valid;
+	      
+		if (shouldPass) {
+		  if (!result.valid) dump('expected to pass', sample, test, result);
+		  assert(result.valid, 'test was expected to pass!');
+		} else {
+		  if (result.valid) dump('expected to fail', sample, test);
+		  assert(!result.valid, 'test was expected to fail!');
+		}
+
+	      });
+	    }
+
+	  });
+	});
+      }
+    });
+  }
+
 });
+

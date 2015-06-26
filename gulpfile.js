@@ -3,6 +3,7 @@ var gutil = require('gulp-util');
 var mocha = require('gulp-mocha');
 var babel = require("gulp-babel");
 var sourcemaps = require('gulp-sourcemaps');
+var clean = require('gulp-rimraf');
 var path = require('path');
 var peg = require('gulp-peg');
 
@@ -25,14 +26,20 @@ var pegOptions = {
 var paths = {
   sourceRoot: path.join(__dirname, 'src'),
   src: ['src/**/*.js'],
+  watch: ['src/**/*.js', 'src/**/*.json'],
   dist: 'dist',
   test: 'dist/test/**/*.js',
   peg: ['src/**/*.peg']
 }
 
-gulp.task('default', ['mocha', 'watch']);
+gulp.task('default', ['test', 'watch']);
 
-gulp.task('babel', function () {
+gulp.task('clean', function() {
+  return gulp.src(paths.dist, { read: false })
+      .pipe(clean());
+});
+
+gulp.task('babel', ['clean'], function () {
   return gulp.src(paths.src)
       .pipe(sourcemaps.init())
       .pipe(babel(babelOptions))
@@ -45,7 +52,7 @@ gulp.task('dist', ['babel'], function() {
     .pipe(gulp.dest(paths.dist));
 });
 
-gulp.task('mocha', ['dist'], function() {
+gulp.task('test', ['dist'], function() {
   return gulp.src(paths.test, {read: false})
     .pipe(mocha({ reporter: 'spec' }))
     ; //.on('error', gutil.log);
@@ -58,6 +65,11 @@ gulp.task('peg', function() {
 });
 
 gulp.task('watch', function () {
-  gulp.watch(paths.src, ['mocha']);
+  gulp.watch(paths.watch, ['test']);
+});
+
+gulp.task('generate-testsuite', ['dist'], function() {
+  var testSuite = require('./dist/test/testsuite');
+  testSuite.generate('./src/test/testsuite');
 });
 
