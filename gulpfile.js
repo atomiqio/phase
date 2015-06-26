@@ -57,3 +57,7 @@ gulp.task('watch', function () {
   gulp.watch(paths.watch, ['test']);
 });
 
+gulp.task('generate-testsuite', ['dist'], function() {
+  var testSuite = require('./dist/test/testsuite');
+  testSuite.generate('./src/test/testsuite');
+});
