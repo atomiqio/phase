@@ -58,34 +58,10 @@ const zSchemaFactory = (schema, options) => {
 
 // for a factory, schema is either a string or JSON object, and options is a validator-specific set of options to pass along
 const validators = [
-/*
-  {
-    name: 'tv4-schema',
-    factory: (schema, options) => tv4SchemaFactory(schema, options),
-    ext: '.json',
-    skip: process.env.SKIP_TV4_SCHEMA
-  },
-  {
-    name: 'z-schema',
-    factory: (schema, options) => zSchemaFactory(schema, options),
-    ext: '.json',
-    skip: process.env.SKIP_Z_SCHEMA
-  },
-  */
-  {
-    name: 'phase',
-    factory: (schema, options) => { return new Phase(schema, options); },
-    ext: '.phase',
-    skip: process.env.SKIP_PHASE
-  }
-  /*,
-  {
-    name: 'phase6',
-    factory: (schema, options) => { return new Phase6(schema, options); },
-    ext: '.phase6',
-    skip: process.env.SKIP_PHASE6
-  }
-  */
+//  { name: 'tv4-schema', factory: (schema, options) => tv4SchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_TV4_SCHEMA },
+//  { name: 'z-schema', factory: (schema, options) => zSchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_Z_SCHEMA },
+  { name: 'phase', factory: (schema, options) => { return new Phase(schema, options); }, ext: '.phase', skip: process.env.SKIP_PHASE }
+//  { name: 'phase6', factory: (schema, options) => { return new Phase6(schema, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
 function dump(msg, sample, test, result) {
