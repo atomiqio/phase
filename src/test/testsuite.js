@@ -69,28 +69,30 @@ function makeDir(dir) {
 }
 
 /*
-  testsuite/
-    additionalItems/
-      additionalItems-are-allowed-by-default/
-        schema.json
-      additionalItems-as-false-without-items/
-        schema.json
-      addtionalItems-as-schema/
-        schema.json
-      array-of-items-with-no-additionalItems/
-        schema.json
-      items-is-schema,-no-additionalItems/
-        schema.json
-    additionalProperties/
-      additionalProperties-allows-a-schema-which-should-validate/
-        schema.json
-      additionalProperties-are-allowed-by-default/
-        schema.json
-      additionalProperties-being-false-does-not-allow-other-properties/
-        schema.json
-      additionalProperties-can-exist-by-itself/
-        schema.json
-    ...
+ testsuite/
+   additionalItems/
+     additionalItems-are-allowed-by-default/
+       schema.json
+     additionalItems-as-false-without-items/
+       schema.json
+     addtionalItems-as-schema/
+       schema.json
+     array-of-items-with-no-additionalItems/
+       schema.json
+     items-is-schema,-no-additionalItems/
+       schema.json
+     additionalProperties/
+     additionalProperties-are-allowed-by-default/
+       schema.json
+     additionalProperties-allows-a-schema-which-should-validate/
+       schema.json
+     additionalProperties-are-allowed-by-default/
+       schema.json
+     additionalProperties-being-false-does-not-allow-other-properties/
+       schema.json
+   additionalProperties-can-exist-by-itself/
+     schema.json
+   ...
  */
 /**
  * Walk the test suite structure and yield each schema along with associated JSON tests.
@@ -117,10 +119,10 @@ function* load(dir, ext) {
       const description = schemaDir.replace(/[~]/g, ' ');
 
       const tests = testsuite
-        .filter(testgroup => testgroup.name == group)
-	.map(testgroup => testgroup.schemas)[0]
-	.filter(schema => schema.description == description)
-	.map(schema => schema.tests)[0];
+          .filter(testgroup => testgroup.name == group)
+          .map(testgroup => testgroup.schemas)[0]
+          .filter(schema => schema.description == description)
+          .map(schema => schema.tests)[0];
 
       yield {
         schema: schema,
@@ -128,7 +130,7 @@ function* load(dir, ext) {
         filename: schemaFile,
         filepath: schemaFilePath,
         group: group,
-	tests: tests
+        tests: tests
       };
     }
   }

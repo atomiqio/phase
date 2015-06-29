@@ -29,7 +29,7 @@ const tv4SchemaFactory = (schema, options) => {
     validate: json => {
       try {
         const valid = tv4.validate(json, schema);
-        return valid ? { valid: true } : { valid: false, errors: [ tv4.error ] };
+        return valid ? { valid: true } : { valid: false, errors: [tv4.error] };
       } catch (err) {
         return { valid: false, errors: [err.message] };
       }
@@ -58,10 +58,34 @@ const zSchemaFactory = (schema, options) => {
 
 // for a factory, schema is either a string or JSON object, and options is a validator-specific set of options to pass along
 const validators = [
-  { name: 'tv4-schema', factory: (schema, options) => tv4SchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_TV4_SCHEMA },
-  { name: 'z-schema', factory: (schema, options) => zSchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_Z_SCHEMA },
-  { name: 'phase', factory: (schema, options) => { return new Phase(schema, options); }, ext: '.phase', skip: process.env.SKIP_PHASE },
-  { name: 'phase6', factory: (schema, options) => { return new Phase6(schema, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
+/*
+  {
+    name: 'tv4-schema',
+    factory: (schema, options) => tv4SchemaFactory(schema, options),
+    ext: '.json',
+    skip: process.env.SKIP_TV4_SCHEMA
+  },
+  {
+    name: 'z-schema',
+    factory: (schema, options) => zSchemaFactory(schema, options),
+    ext: '.json',
+    skip: process.env.SKIP_Z_SCHEMA
+  },
+  */
+  {
+    name: 'phase',
+    factory: (schema, options) => { return new Phase(schema, options); },
+    ext: '.phase',
+    skip: process.env.SKIP_PHASE
+  }
+  /*,
+  {
+    name: 'phase6',
+    factory: (schema, options) => { return new Phase6(schema, options); },
+    ext: '.phase6',
+    skip: process.env.SKIP_PHASE6
+  }
+  */
 ];
 
 function dump(msg, sample, test, result) {
@@ -92,7 +116,7 @@ function dump(msg, sample, test, result) {
  *     valid: t|f
  *   }]
  * }
- * 
+ *
  */
 function* loadSamples(ext) {
   const testsuitePath = join(__dirname, 'testsuite');
@@ -104,7 +128,7 @@ function* loadSamples(ext) {
 
 // TESTS
 
-describe('validator tests', function() {
+describe('validator tests', function () {
 
   after(() => {
     prn('===================');
@@ -117,35 +141,35 @@ describe('validator tests', function() {
 
     describe(name, () => {
       before(() => {
-	// just to make the test suites a little easier to distinguish in the console
-	prn('===================');
+        // just to make the test suites a little easier to distinguish in the console
+        prn('===================');
       });
 
 
       for (const sample of loadSamples(ext)) {
-	
-	describe(sample.group, function() {
-	  describe(sample.description, () => {
-	    const phaser = factory(sample.schema);
 
-	    for (const test of sample.tests) {
-	      it (test.description, function() {
-		const result = phaser.validate(test.data);
-		const shouldPass = test.valid;
-	      
-		if (shouldPass) {
-		  if (!result.valid) dump('expected to pass', sample, test, result);
-		  assert(result.valid, 'test was expected to pass!');
-		} else {
-		  if (result.valid) dump('expected to fail', sample, test);
-		  assert(!result.valid, 'test was expected to fail!');
-		}
+        describe(sample.group, function () {
+          describe(sample.description, () => {
+            const phaser = factory(sample.schema);
 
-	      });
-	    }
+            for (const test of sample.tests) {
+              it(test.description, function () {
+                const result = phaser.validate(test.data);
+                const shouldPass = test.valid;
 
-	  });
-	});
+                if (shouldPass) {
+                  if (!result.valid) dump('expected to pass', sample, test, result);
+                  assert(result.valid, 'test was expected to pass!');
+                } else {
+                  if (result.valid) dump('expected to fail', sample, test);
+                  assert(!result.valid, 'test was expected to fail!');
+                }
+
+              });
+            }
+
+          });
+        });
       }
     });
   }
