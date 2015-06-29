@@ -1,0 +1,10 @@
+CDIR=$PWD
+for i in $(find . -type d); do
+  DIR=${i%}
+  cd ${DIR}
+  if [ -f schema.json ]; then
+    cp schema.json schema.phase
+  fi
+  cd ${CDIR}
+done
+
