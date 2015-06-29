@@ -15,8 +15,8 @@ export class Phase {
   }
 
   validate(obj) {
-    return {};
-    return { errors: [] };
+    throw new Error('not implemented');
+    return { valid: false, errors: [ 'not implemented' ] };
   }
 
 }
