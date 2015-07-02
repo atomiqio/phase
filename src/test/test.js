@@ -1,7 +1,7 @@
 import promisify from '@atomiq/promisify';
 import assert from 'assert';
-import { join } from 'path';
-import { readdirSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { Phase } from '../lib/phase';
 import { Phase6 } from '../phase6';
 import tv4 from 'tv4';
@@ -118,6 +118,8 @@ describe('validator tests', function () {
 	    try {
 	      const phaser = factory(sample.schema, { filename: sample.filename, filepath: sample.filepath });
 
+	      dumpDebug(dirname(sample.filepath), phaser);
+
 	      for (const test of sample.tests) {
 		it(test.description, function () {
 		  validate(phaser, sample, test);
@@ -137,6 +139,17 @@ describe('validator tests', function () {
   }
 
 });
+
+function dumpDebug(dir, validator) {
+  if (validator.ast && validator.schema) {
+    let data = {
+      ast: validator.ast,
+      schema: validator.schema
+    }
+
+    writeFileSync(join(dir, 'dump.json'), JSON.stringify(data, null, 2));
+  }
+}
 
 function dump(msg, validator, sample, test, result) {
   let lines = [];
