@@ -65,21 +65,6 @@ const validators = [
 //  { name: 'phase6', factory: (schema, options) => { return new Phase6(schema, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
-/*
-function dump(msg, sample, test, result) {
-  prn('\n[X] %s: %s', msg, sample.description);
-  prn(sample.filepath);
-  prn(' -> %s', test.description);
-  prn(test.data);
-  prn();
-  if (test.errors && test.errors.length) {
-    prn('errors (%d)', test.errors.length);
-    prn(test.errors);
-    prn('-----------------\n');
-  }
-}
-*/
-
 
 /**
  * Traverse the testsuite directory and yield schema objects:
@@ -110,9 +95,9 @@ function* loadSamples(ext) {
 describe('validator tests', function () {
 
   after(() => {
-    prn('===================');
-    prn('Summary');
-    prn('===================');
+    //prn('===================');
+    //prn('Summary');
+    //prn('===================');
   });
 
   for (let { name, factory, ext, skip } of validators) {
@@ -121,7 +106,7 @@ describe('validator tests', function () {
     describe(name, () => {
       before(() => {
         // just to make the test suites a little easier to distinguish in the console
-        prn('===================');
+        //prn('===================');
       });
 
 

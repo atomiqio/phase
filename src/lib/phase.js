@@ -1,6 +1,7 @@
 import parser from './phase-parser';
 import { readFile, readFileSync } from 'fs';
 import ZSchema from 'z-schema';
+import { includes } from 'lodash';
 
 const validatorFactory = (schema, options) => {
   const zschema = new ZSchema(options);
@@ -91,17 +92,41 @@ export class Phase {
  * @param ast abstract syntax tree
  */
 function transform(ast) {
-  console.log('AST =>');
-  console.log(ast);
+  return generators[ast.tt](ast);
+}
 
-  const schema = {};
+const generators = {
 
-  if (typeof ast == 'object') {
-    schema.type = ast.type;
+  typeSpec: generateFromTypeSpec,
+  complexType: generateFromComplexType
+
+}
+
+function generateFromTypeSpec(ast) {
+  return {
+    type: ast.type
   }
+}
 
-  console.log('SCHEMA =>');
-  console.log(schema);
+function generateFromComplexType(ast) {
+  let schema = {};
+
+  ast.properties.forEach(p => {
+    if (!schema.properties) schema.properties = {};
+
+    let type = p.typeSpec ? p.typeSpec.type : {};
+    schema.properties[p.name] = type || {};
+
+    if (p.typeSpec && p.typeSpec.annotations) {
+      let req = includes(p.typeSpec.annotations, 'required');
+      if (req) {
+       if (!schema.required) schema.required = [];
+       schema.required.push(p.name);
+      }
+    }
+
+  });
+
   return schema;
 }
 
