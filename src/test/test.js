@@ -9,6 +9,7 @@ import ZSchema from 'z-schema';
 import testSuite from './testsuite';
 import { draft4 } from 'json-schema-test-suite';
 import { format, inherits } from 'util';
+import { isEqual } from 'lodash';
 
 const prn = console.log;
 
@@ -122,7 +123,11 @@ describe('validator tests', function () {
 
 	      for (const test of sample.tests) {
 		it(test.description, function () {
-		  validate(phaser, sample, test);
+		  // if the generated schema is equal to the source, then validation should pass
+		  verifyEqual(phaser, sample);
+
+		  // explicit validation
+		  // validate(phaser, sample, test);
 		});
 	      }
 	    } catch (err) {
@@ -160,13 +165,15 @@ function dump(msg, validator, sample, test, result) {
 
   prn('\n%s: %s', msg, sample.description);
   prn(sample.filepath);
-  prn('test description: %s =>', test.description);
-  prn(test.data);
+  if (test) {
+    prn('test description: %s =>', test.description);
+    prn(test.data);
+  }
   if (result) {
     prn('\n%s', 'result =>');
     prn(result);
   }
-  if (test.errors && test.errors.length) {
+  if (test && test.errors && test.errors.length) {
     prn('\nerrors (%d)', test.errors.length);
     prn(test.errors);
   }
@@ -199,6 +206,19 @@ function validate(validator, sample, test) {
 
   if (test.valid != result.valid) {
     throw new ValidationError(validator, sample, test, result);
+  }
+}
+
+function VerificationError(validator, sample) {
+  this.name = 'VerificationError';
+  this.message = dump('generated schema does not match original', validator, sample);
+}
+
+inherits(VerificationError, Error);
+
+function verifyEqual(validator, sample) {
+  if (!isEqual(validator.schema, sample.jsonSchema)) {
+    throw new VerificationError(validator, sample);
   }
 }
 

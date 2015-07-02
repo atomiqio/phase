@@ -114,8 +114,16 @@ function* load(dir, ext) {
       const schemaFile = readdirSync(schemaPath).filter(f => f.endsWith('schema' + ext))[0];
       if (!schemaFile) continue;
 
+
       const schemaFilePath = join(schemaPath, schemaFile);
       const schema = readFileSync(schemaFilePath, 'utf8');
+
+      // add the original JSON schema file for reference
+      const jsonSchemaFile = readdirSync(schemaPath).filter(f => f == 'schema.json')[0];
+      let jsonSchema;
+      if (jsonSchemaFile) {
+	jsonSchema = JSON.parse(readFileSync(join(schemaPath, jsonSchemaFile), 'utf8'));
+      }
 
       // restore spaces to get actual description from test suite
       const description = schemaDir.replace(/[~]/g, ' ');
@@ -128,6 +136,7 @@ function* load(dir, ext) {
 
       yield {
         schema: schema,
+	jsonSchema: jsonSchema,
         description: description,
         filename: schemaFile,
         filepath: schemaFilePath,
