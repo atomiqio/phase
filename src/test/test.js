@@ -127,7 +127,7 @@ describe('validator tests', function () {
 		  verifyEqual(phaser, sample);
 
 		  // explicit validation
-		  // validate(phaser, sample, test);
+		  //validate(phaser, sample, test);
 		});
 	      }
 	    } catch (err) {
