@@ -1,7 +1,7 @@
 import parser from './phase-parser';
 import { readFile, readFileSync } from 'fs';
 import ZSchema from 'z-schema';
-import { includes } from 'lodash';
+import { includes, find } from 'lodash';
 
 const validatorFactory = (schema, options) => {
   const zschema = new ZSchema(options);
@@ -118,7 +118,7 @@ function generateFromComplexType(ast) {
 
     if (p.typeSpec && p.typeSpec.annotations) {
       // TODO required will be a built in annotation, but still shouldn't be hard-coded like this
-      let req = includes(p.typeSpec.annotations, 'required');
+      let req = find(p.typeSpec.annotations, { name: 'required' });
       if (req) {
        if (!schema.required) schema.required = [];
        schema.required.push(p.name);
