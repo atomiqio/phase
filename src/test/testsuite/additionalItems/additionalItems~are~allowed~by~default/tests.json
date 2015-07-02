@@ -1,0 +1,11 @@
+[
+  {
+    "description": "only the first item is validated",
+    "data": [
+      1,
+      "foo",
+      false
+    ],
+    "valid": true
+  }
+]

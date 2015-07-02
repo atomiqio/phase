@@ -1,0 +1,11 @@
+[
+  {
+    "description": "additional properties are allowed",
+    "data": {
+      "foo": 1,
+      "bar": 2,
+      "quux": true
+    },
+    "valid": true
+  }
+]

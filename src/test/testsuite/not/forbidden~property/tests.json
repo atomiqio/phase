@@ -1,0 +1,18 @@
+[
+  {
+    "description": "property present",
+    "data": {
+      "foo": 1,
+      "bar": 2
+    },
+    "valid": false
+  },
+  {
+    "description": "property absent",
+    "data": {
+      "bar": 1,
+      "baz": 2
+    },
+    "valid": true
+  }
+]

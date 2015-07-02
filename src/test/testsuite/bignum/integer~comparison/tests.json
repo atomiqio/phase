@@ -1,0 +1,7 @@
+[
+  {
+    "description": "comparison works for very negative numbers",
+    "data": -18446744073709552000,
+    "valid": true
+  }
+]

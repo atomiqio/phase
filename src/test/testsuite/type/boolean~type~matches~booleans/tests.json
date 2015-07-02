@@ -1,0 +1,37 @@
+[
+  {
+    "description": "an integer is not a boolean",
+    "data": 1,
+    "valid": false
+  },
+  {
+    "description": "a float is not a boolean",
+    "data": 1.1,
+    "valid": false
+  },
+  {
+    "description": "a string is not a boolean",
+    "data": "foo",
+    "valid": false
+  },
+  {
+    "description": "an object is not a boolean",
+    "data": {},
+    "valid": false
+  },
+  {
+    "description": "an array is not a boolean",
+    "data": [],
+    "valid": false
+  },
+  {
+    "description": "a boolean is not a boolean",
+    "data": true,
+    "valid": true
+  },
+  {
+    "description": "null is not a boolean",
+    "data": null,
+    "valid": false
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "description": "changed scope ref valid",
+    "data": [
+      [
+        1
+      ]
+    ],
+    "valid": true
+  },
+  {
+    "description": "changed scope ref invalid",
+    "data": [
+      [
+        "a"
+      ]
+    ],
+    "valid": false
+  }
+]

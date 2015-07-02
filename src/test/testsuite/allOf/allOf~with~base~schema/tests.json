@@ -1,0 +1,42 @@
+[
+  {
+    "description": "valid",
+    "data": {
+      "foo": "quux",
+      "bar": 2,
+      "baz": null
+    },
+    "valid": true
+  },
+  {
+    "description": "mismatch base schema",
+    "data": {
+      "foo": "quux",
+      "baz": null
+    },
+    "valid": false
+  },
+  {
+    "description": "mismatch first allOf",
+    "data": {
+      "bar": 2,
+      "baz": null
+    },
+    "valid": false
+  },
+  {
+    "description": "mismatch second allOf",
+    "data": {
+      "foo": "quux",
+      "bar": 2
+    },
+    "valid": false
+  },
+  {
+    "description": "mismatch both",
+    "data": {
+      "bar": 2
+    },
+    "valid": false
+  }
+]

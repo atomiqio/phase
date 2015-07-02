@@ -1,0 +1,13 @@
+[
+  {
+    "description": "valid definition schema",
+    "data": {
+      "definitions": {
+        "foo": {
+          "type": "integer"
+        }
+      }
+    },
+    "valid": true
+  }
+]

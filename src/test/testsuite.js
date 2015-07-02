@@ -39,6 +39,7 @@ function generate(dir) {
       const name = schema.description.replace(/[ ]/g, '~');
       const schemaPath = createDir(groupDir, name, ' - ');
       writeFileSync(join(schemaPath, 'schema.json'), stringify(schema.schema, 2));
+      writeFileSync(join(schemaPath, 'tests.json'), stringify(schema.tests, 2));
     });
   });
 
@@ -109,7 +110,8 @@ function* load(dir, ext) {
     const schemaDirs = readdirSync(groupPath);
     for (const schemaDir of schemaDirs) {
       const schemaPath = join(groupPath, schemaDir);
-      const schemaFile = readdirSync(schemaPath).filter(f => f.endsWith(ext))[0];
+      //const schemaFile = readdirSync(schemaPath).filter(f => f.endsWith(ext))[0];
+      const schemaFile = readdirSync(schemaPath).filter(f => f.endsWith('schema' + ext))[0];
       if (!schemaFile) continue;
 
       const schemaFilePath = join(schemaPath, schemaFile);

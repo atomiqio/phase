@@ -2,12 +2,13 @@ import promisify from '@atomiq/promisify';
 import assert from 'assert';
 import { join } from 'path';
 import { readdirSync, readFileSync } from 'fs';
-import { Phase } from '../phase';
+import { Phase } from '../lib/phase';
 import { Phase6 } from '../phase6';
 import tv4 from 'tv4';
 import ZSchema from 'z-schema';
 import testSuite from './testsuite';
 import { draft4 } from 'json-schema-test-suite';
+import { format, inherits } from 'util';
 
 const prn = console.log;
 
@@ -47,7 +48,7 @@ const zSchemaFactory = (schema, options) => {
   return {
     validate: json => {
       try {
-        var valid = zschema.validate(json, schema);
+        const valid = zschema.validate(json, schema);
         return valid ? { valid: true } : { valid: false, errors: zschema.getLastErrors() };
       } catch (err) {
         return { valid: false, errors: [err.message] };
@@ -60,10 +61,11 @@ const zSchemaFactory = (schema, options) => {
 const validators = [
 //  { name: 'tv4-schema', factory: (schema, options) => tv4SchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_TV4_SCHEMA },
 //  { name: 'z-schema', factory: (schema, options) => zSchemaFactory(schema, options), ext: '.json', skip: process.env.SKIP_Z_SCHEMA },
-  { name: 'phase', factory: (schema, options) => { return new Phase(schema, options); }, ext: '.phase', skip: process.env.SKIP_PHASE }
+  { name: 'phase', factory: (schema, options) => { return Phase.parse(schema, options) }, ext: '.phase', skip: process.env.SKIP_PHASE }
 //  { name: 'phase6', factory: (schema, options) => { return new Phase6(schema, options); }, ext: '.phase6', skip: process.env.SKIP_PHASE6 }
 ];
 
+/*
 function dump(msg, sample, test, result) {
   prn('\n[X] %s: %s', msg, sample.description);
   prn(sample.filepath);
@@ -76,6 +78,7 @@ function dump(msg, sample, test, result) {
     prn('-----------------\n');
   }
 }
+*/
 
 
 /**
@@ -126,23 +129,22 @@ describe('validator tests', function () {
 
         describe(sample.group, function () {
           describe(sample.description, () => {
-            const phaser = factory(sample.schema);
 
-            for (const test of sample.tests) {
-              it(test.description, function () {
-                const result = phaser.validate(test.data);
-                const shouldPass = test.valid;
+	    try {
+	      const phaser = factory(sample.schema, { filename: sample.filename, filepath: sample.filepath });
 
-                if (shouldPass) {
-                  if (!result.valid) dump('expected to pass', sample, test, result);
-                  assert(result.valid, 'test was expected to pass!');
-                } else {
-                  if (result.valid) dump('expected to fail', sample, test);
-                  assert(!result.valid, 'test was expected to fail!');
-                }
-
-              });
-            }
+	      for (const test of sample.tests) {
+		it(test.description, function () {
+		  validate(phaser, sample, test);
+		});
+	      }
+	    } catch (err) {
+	      if (err.name == 'SyntaxError') {
+		console.log(err);
+	      } else {
+	        throw err;
+              }
+	    }
 
           });
         });
@@ -151,4 +153,55 @@ describe('validator tests', function () {
   }
 
 });
+
+function dump(msg, validator, sample, test, result) {
+  let lines = [];
+
+  function prn() {
+    lines.push(format.apply(null, arguments));
+  }
+
+  prn('\n%s: %s', msg, sample.description);
+  prn(sample.filepath);
+  prn('test description: %s =>', test.description);
+  prn(test.data);
+  if (result) {
+    prn('\n%s', 'result =>');
+    prn(result);
+  }
+  if (test.errors && test.errors.length) {
+    prn('\nerrors (%d)', test.errors.length);
+    prn(test.errors);
+  }
+  prn('\n%s', 'Validator State =>');
+  prn(validator);
+
+  return lines.join('\n');
+}
+
+
+function ValidationError(validator, sample, test, result) {
+  this.name = 'ValidationError';
+
+  let message;
+
+  // it should have passed if test.valid is true
+  if (test.valid && !result.valid) {
+    message = dump('expected to pass', validator, sample, test, result);
+  } else {
+    message = dump('expected to fail', validator, sample, test);
+  }
+
+  this.message = message;
+}
+
+inherits(ValidationError, Error);
+
+function validate(validator, sample, test) {
+  const result = validator.validate(test.data);
+
+  if (test.valid != result.valid) {
+    throw new ValidationError(validator, sample, test, result);
+  }
+}
 

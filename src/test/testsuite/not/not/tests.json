@@ -1,0 +1,12 @@
+[
+  {
+    "description": "allowed",
+    "data": "foo",
+    "valid": true
+  },
+  {
+    "description": "disallowed",
+    "data": 1,
+    "valid": false
+  }
+]

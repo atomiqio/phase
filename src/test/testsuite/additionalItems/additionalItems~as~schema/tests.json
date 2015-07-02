@@ -1,0 +1,22 @@
+[
+  {
+    "description": "additional items match schema",
+    "data": [
+      null,
+      2,
+      3,
+      4
+    ],
+    "valid": true
+  },
+  {
+    "description": "additional items do not match schema",
+    "data": [
+      null,
+      2,
+      3,
+      "foo"
+    ],
+    "valid": false
+  }
+]

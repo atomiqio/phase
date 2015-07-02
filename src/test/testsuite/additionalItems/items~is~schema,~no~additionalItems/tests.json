@@ -1,0 +1,13 @@
+[
+  {
+    "description": "all items match schema",
+    "data": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "valid": true
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "description": "nested ref valid",
+    "data": 5,
+    "valid": true
+  },
+  {
+    "description": "nested ref invalid",
+    "data": "a",
+    "valid": false
+  }
+]

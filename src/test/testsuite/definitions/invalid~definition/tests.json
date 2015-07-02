@@ -1,0 +1,13 @@
+[
+  {
+    "description": "invalid definition schema",
+    "data": {
+      "definitions": {
+        "foo": {
+          "type": 1
+        }
+      }
+    },
+    "valid": false
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "description": "an additional valid property is valid",
+    "data": {
+      "foo": true
+    },
+    "valid": true
+  },
+  {
+    "description": "an additional invalid property is invalid",
+    "data": {
+      "foo": 1
+    },
+    "valid": false
+  }
+]
