@@ -114,7 +114,6 @@ function* load(dir, ext) {
       const schemaFile = readdirSync(schemaPath).filter(f => f.endsWith('schema' + ext))[0];
       if (!schemaFile) continue;
 
-
       const schemaFilePath = join(schemaPath, schemaFile);
       const schema = readFileSync(schemaFilePath, 'utf8');
 

@@ -57,11 +57,11 @@ id
  = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
 
 property
- = id:id annotations:(space+ annotations)? {
-     return property(id, typeSpec(undefined, annotations ? annotations[1] : []))
-   }
- / id:id typeSpec:(space+ typeSpec) {
+ = id:id typeSpec:(space+ typeSpec) {
      return property(id, typeSpec[1])
+   }
+ / id:id annotations:(space+ annotations)? {
+     return property(id, typeSpec(undefined, annotations ? annotations[1] : []))
    }
  / id:id {
      return property(id)

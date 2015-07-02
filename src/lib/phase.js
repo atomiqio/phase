@@ -114,10 +114,10 @@ function generateFromComplexType(ast) {
   ast.properties.forEach(p => {
     if (!schema.properties) schema.properties = {};
 
-    let type = p.typeSpec ? p.typeSpec.type : {};
-    schema.properties[p.name] = type || {};
+    schema.properties[p.name] = p.typeSpec && p.typeSpec.type ? { type: p.typeSpec.type } : {};
 
     if (p.typeSpec && p.typeSpec.annotations) {
+      // TODO required will be a built in annotation, but still shouldn't be hard-coded like this
       let req = includes(p.typeSpec.annotations, 'required');
       if (req) {
        if (!schema.required) schema.required = [];
