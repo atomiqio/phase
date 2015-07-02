@@ -5,6 +5,7 @@ var babel = require("gulp-babel");
 var sourcemaps = require('gulp-sourcemaps');
 var clean = require('gulp-rimraf');
 var path = require('path');
+var peg = require('gulp-peg');
 
 var babelOptions = {
   // http://babeljs.io/docs/usage/experimental/
@@ -14,9 +15,12 @@ var babelOptions = {
   optional: ['runtime'],
 
   // http://babeljs.io/docs/advanced/transformers/#optional
-  //whitelist: [],
 
+  // whitelist: [],
   blacklist: []
+};
+
+var pegOptions = {
 };
 
 var paths = {
@@ -24,7 +28,8 @@ var paths = {
   src: ['src/**/*.js'],
   watch: ['src/**/*.js', 'src/**/*.json'],
   dist: 'dist',
-  test: 'dist/test/**/*.js'
+  test: 'dist/test/**/*.js',
+  peg: ['src/**/*.pegjs']
 }
 
 gulp.task('default', ['test', 'watch']);
@@ -34,7 +39,13 @@ gulp.task('clean', function() {
       .pipe(clean());
 });
 
-gulp.task('babel', ['clean'], function () {
+gulp.task('peg', ['clean'], function() {
+  return gulp.src(paths.peg)
+    .pipe(peg(pegOptions)) //.on('error', gutil.log))
+    .pipe(gulp.dest(paths.dist));
+});
+
+gulp.task('babel', ['peg'], function () {
   return gulp.src(paths.src)
       .pipe(sourcemaps.init())
       .pipe(babel(babelOptions))
@@ -43,7 +54,7 @@ gulp.task('babel', ['clean'], function () {
 });
 
 gulp.task('dist', ['babel'], function() {
-  return gulp.src(['src/**/*', '!**/*.js'], {base: 'src'})
+  return gulp.src(['src/**/*', '!**/*.js', '!**/*.pegjs'], {base: 'src'})
     .pipe(gulp.dest(paths.dist));
 });
 
@@ -61,3 +72,4 @@ gulp.task('generate-testsuite', ['dist'], function() {
   var testSuite = require('./dist/test/testsuite');
   testSuite.generate('./src/test/testsuite');
 });
+

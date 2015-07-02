@@ -1,0 +1,17 @@
+[
+  {
+    "description": "mismatch base schema",
+    "data": 3,
+    "valid": false
+  },
+  {
+    "description": "one oneOf valid",
+    "data": "foobar",
+    "valid": true
+  },
+  {
+    "description": "both oneOf valid",
+    "data": "foo",
+    "valid": false
+  }
+]

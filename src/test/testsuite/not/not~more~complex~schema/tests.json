@@ -1,0 +1,21 @@
+[
+  {
+    "description": "match",
+    "data": 1,
+    "valid": true
+  },
+  {
+    "description": "other match",
+    "data": {
+      "foo": 1
+    },
+    "valid": true
+  },
+  {
+    "description": "mismatch",
+    "data": {
+      "foo": "bar"
+    },
+    "valid": false
+  }
+]

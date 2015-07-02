@@ -1,0 +1,7 @@
+[
+  {
+    "description": "matches a substring",
+    "data": "xxaayy",
+    "valid": true
+  }
+]

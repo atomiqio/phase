@@ -1,0 +1,46 @@
+[
+  {
+    "description": "a single valid match is valid",
+    "data": {
+      "a": 21
+    },
+    "valid": true
+  },
+  {
+    "description": "a simultaneous match is valid",
+    "data": {
+      "aaaa": 18
+    },
+    "valid": true
+  },
+  {
+    "description": "multiple matches is valid",
+    "data": {
+      "a": 21,
+      "aaaa": 18
+    },
+    "valid": true
+  },
+  {
+    "description": "an invalid due to one is invalid",
+    "data": {
+      "a": "bar"
+    },
+    "valid": false
+  },
+  {
+    "description": "an invalid due to the other is invalid",
+    "data": {
+      "aaaa": 31
+    },
+    "valid": false
+  },
+  {
+    "description": "an invalid due to both is invalid",
+    "data": {
+      "aaa": "foo",
+      "aaaa": 31
+    },
+    "valid": false
+  }
+]

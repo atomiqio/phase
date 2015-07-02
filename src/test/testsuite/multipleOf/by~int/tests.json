@@ -1,0 +1,17 @@
+[
+  {
+    "description": "int by int",
+    "data": 10,
+    "valid": true
+  },
+  {
+    "description": "int by int fail",
+    "data": 7,
+    "valid": false
+  },
+  {
+    "description": "ignores non-numbers",
+    "data": "foo",
+    "valid": true
+  }
+]

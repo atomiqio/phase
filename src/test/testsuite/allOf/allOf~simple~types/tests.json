@@ -1,0 +1,12 @@
+[
+  {
+    "description": "valid",
+    "data": 25,
+    "valid": true
+  },
+  {
+    "description": "mismatch one",
+    "data": 35,
+    "valid": false
+  }
+]

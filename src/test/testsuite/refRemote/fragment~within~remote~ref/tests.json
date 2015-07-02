@@ -1,0 +1,12 @@
+[
+  {
+    "description": "remote fragment valid",
+    "data": 1,
+    "valid": true
+  },
+  {
+    "description": "remote fragment invalid",
+    "data": "a",
+    "valid": false
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "description": "match array",
+    "data": [
+      1,
+      2
+    ],
+    "valid": true
+  },
+  {
+    "description": "mismatch array",
+    "data": [
+      1,
+      "foo"
+    ],
+    "valid": false
+  }
+]

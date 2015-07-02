@@ -1,0 +1,12 @@
+[
+  {
+    "description": "one of the enum is valid",
+    "data": 1,
+    "valid": true
+  },
+  {
+    "description": "something else is invalid",
+    "data": 4,
+    "valid": false
+  }
+]

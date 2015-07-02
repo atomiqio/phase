@@ -1,0 +1,7 @@
+[
+  {
+    "description": "a negative bignum is a number",
+    "data": -9.824928374923492e+52,
+    "valid": true
+  }
+]

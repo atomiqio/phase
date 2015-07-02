@@ -1,6 +1,2 @@
-{
-  "type": [
-    "integer",
-    "string"
-  ]
-}
+[integer, string]
+

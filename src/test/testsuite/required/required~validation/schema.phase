@@ -1,9 +1,4 @@
 {
-  "properties": {
-    "foo": {},
-    "bar": {}
-  },
-  "required": [
-    "foo"
-  ]
+  foo @required
+  bar
 }
