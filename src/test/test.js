@@ -141,9 +141,8 @@ describe('validator tests', function () {
 	    } catch (err) {
 	      if (err.name == 'SyntaxError') {
 		console.log(err);
-	      } else {
-	        throw err;
               }
+	      throw err;
 	    }
 
           });

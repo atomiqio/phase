@@ -17,6 +17,13 @@ ws
  = [ \t]
  / lb
 
+uniontype
+ = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
+     return [type].concat(types.map(function(t) {
+       return t[3];
+     }))
+   }
+
 type
  = 'array'
  / 'boolean'
@@ -25,12 +32,13 @@ type
  / 'null'
  / 'object'
  / 'string'
+ / uniontype
 
 typespec
  = type:type { return typespec(type) }
 
 schema
- = ws+ { return }
- / ws* typespec:typespec ws* { return typespec }
+ = ws* typespec:typespec ws* { return typespec }
+ / ws+ { return }
 
 

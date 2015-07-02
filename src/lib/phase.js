@@ -91,6 +91,17 @@ export class Phase {
  * @param ast abstract syntax tree
  */
 function transform(ast) {
-  return { type: 'string' };
+  console.log('AST =>');
+  console.log(ast);
+
+  const schema = {};
+
+  if (typeof ast == 'object') {
+    schema.type = ast.type;
+  }
+
+  console.log('SCHEMA =>');
+  console.log(schema);
+  return schema;
 }
 
