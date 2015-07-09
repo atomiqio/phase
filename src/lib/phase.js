@@ -52,8 +52,8 @@ export class Phase {
       phase.ast = parser.parse(phase.raw);
     } catch (err) {
       if (err.name == 'SyntaxError' && phase.filename) {
-  err.filename = phase.filename;
-  err.filepath = phase.filepath;
+        err.filename = phase.filename;
+        err.filepath = phase.filepath;
       }
       throw err;
     }
@@ -100,7 +100,7 @@ export class Phase {
       if (err) return callback(err);
 
       try {
-  callback(null, Phase.parse(text, options));
+        callback(null, Phase.parse(text, options));
       } catch (err) {
         callback(err);
       }
