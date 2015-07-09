@@ -1,0 +1,3 @@
+{
+  bar string @minLength(4) @default('bad')
+}
