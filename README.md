@@ -1,7 +1,14 @@
 phase
 =====
 
-Phase provides a simple, intuitive, easy to write and easy to process set of rules that can be transformed into JSON Schema.
+Phase provides a simple, intuitive, easy to write and easy to process schema language for declaring type information that can be transformed into formal JSON Schema, used for validating JSON data.
+
+For more information, see the following:
+
+ * [JSON Overview](wiki/JSON Overview)
+ * [JSON Schema Overview](wiki/JSON Schema Overview)
+ * [Phase Overview](wiki/Phase Overview)
+ * [Phase Schema](wiki/Phase Schema)
 
 Example
 -------
@@ -134,8 +141,4 @@ And so is this:
 
 
 
-
-## For more information
-
-See the [wiki](https://github.com/atomiqio/phase/wiki) to learn more about Phase.
 
