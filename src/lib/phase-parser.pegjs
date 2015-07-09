@@ -29,6 +29,13 @@
     }
   }
 
+  function annotationWithArg(name, value) {
+    return {
+      tt: 'annotation',
+      name: name,
+      value: value
+    }
+  }
 }
 
 start
@@ -52,7 +59,7 @@ ws
  / lb
 
 id
- = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
+ = first:[a-zA-Z_$^] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
 
 property
  = id:id typeSpec:(space+ typeSpec) {
@@ -92,8 +99,56 @@ type
 typeSpec
  = type:type annotations:(space+ annotations)? { return typeSpec(type, annotations ? annotations[1] : undefined )}
 
+string
+ = [a-zA-Z0-9_$-]*
+
+integer
+ = [-0-9]*
+
+boolean
+ = 'true'
+ / 'false'
+
+object
+ = '{}'
+
+array
+ = '[]'
+
+structure
+ = object
+ / array
+
+argument
+ = ['] argument:string ['] { return argument.join('')}
+ / ["] argument:string ["] { return argument.join('')}
+ / argument:structure { return JSON.parse(argument) }
+ / argument:typeSpec
+ / argument:annotation
+ / argument:boolean { return JSON.parse(argument) }
+ / argument:integer { return parseInt(argument.join('')) }
+
+arguments
+ = arguments:((argument ([,] space+))+ argument) { function trueArg(value){return value[0] !== ',' && value[1] !== ' '}; 
+    var args = [];
+    arguments[0].forEach(function(a) {
+      if (Array.isArray(a)) {
+        a.forEach(function(v) {
+          if (trueArg(v)) {
+            args.push(v)
+          }
+        })
+      }
+    })
+    args.push(arguments[arguments.length-1]);
+    return args
+}
+
 annotation
- = '@' id:id { return annotation(id) }
+ = '@' id:id '(' args:arguments ')' { return annotationWithArg(id, args) }
+ / '@' id:id '(' argument:argument ')' { return annotationWithArg(id, argument) } 
+ / '@' id:id '(' space* ')' { return annotation(id) }
+ / '@' id:id { return annotation(id) }
 
 annotations
  = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
@@ -103,5 +158,4 @@ annotations
 propertyOrAnnotation
  = property
  / annotation
-
 
