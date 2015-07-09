@@ -5,10 +5,10 @@ Phase provides a simple, intuitive, easy to write and easy to process schema lan
 
 For more information, see the following:
 
- * [JSON Overview](wiki/JSON Overview)
- * [JSON Schema Overview](wiki/JSON Schema Overview)
- * [Phase Overview](wiki/Phase Overview)
- * [Phase Schema](wiki/Phase Schema)
+ * [JSON Overview](https://github.com/atomiqio/phase/wiki/JSON Overview)
+ * [JSON Schema Overview](https://github.com/atomiqio/phase/wiki/JSON Schema Overview)
+ * [Phase Overview](https://github.com/atomiqio/phase/wiki/Phase Overview)
+ * [Phase Schema](https://github.com/atomiqio/phase/wiki/Phase Schema)
 
 Example
 -------
