@@ -29,6 +29,13 @@
     }
   }
 
+  function annotationWithArg(name, value) {
+    return {
+      tt: 'annotation',
+      name: name,
+      value: value
+    }
+  }
 }
 
 start
@@ -92,8 +99,61 @@ type
 typeSpec
  = type:type annotations:(space+ annotations)? { return typeSpec(type, annotations ? annotations[1] : undefined )}
 
+string
+ = ["]string:[a-zA-Z0-9_+#/:*.$^-]+["] {return string.join('')}
+ / [']string:[a-zA-Z0-9_+#/:*.$^-]+['] {return string.join('')}
+
+integer
+ = [-0-9]+
+
+float
+ = float:([-]?[0-9]*'.'[0-9]+([eE][-+]?[0-9]+)?) { var str = float.join('').split(','); return str}
+
+number
+ = float
+ / integer
+
+boolean
+ = 'true'
+ / 'false'
+
+object
+ = '{}'
+
+array
+ = '[]'
+
+structure
+ = object
+ / array
+
+argument
+ = string
+ / argument:structure { return JSON.parse(argument) }
+ / argument:boolean { return JSON.parse(argument) }
+ / argument:number {return JSON.parse(argument.join(''))}
+
+arguments
+ = arguments:((argument ([,] space*))+ argument) { function trueArg(value){return value[0] !== ',' && value[1] !== ' '}; 
+    var args = [];
+    arguments[0].forEach(function(a) {
+      if (Array.isArray(a)) {
+        a.forEach(function(v) {
+          if (trueArg(v)) {
+            args.push(v)
+          }
+        })
+      }
+    })
+    args.push(arguments[arguments.length-1]);
+    return args
+}
+
 annotation
- = '@' id:id { return annotation(id) }
+ = '@' id:id '(' args:arguments ')' { return annotationWithArg(id, args) }
+ / '@' id:id '(' argument:argument ')' { return annotationWithArg(id, argument) } 
+ / '@' id:id '(' space* ')' { return annotation(id) }
+ / '@' id:id { return annotation(id) }
 
 annotations
  = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
@@ -103,5 +163,3 @@ annotations
 propertyOrAnnotation
  = property
  / annotation
-
-

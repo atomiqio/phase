@@ -52,8 +52,8 @@ export class Phase {
       phase.ast = parser.parse(phase.raw);
     } catch (err) {
       if (err.name == 'SyntaxError' && phase.filename) {
-	err.filename = phase.filename;
-	err.filepath = phase.filepath;
+        err.filename = phase.filename;
+        err.filepath = phase.filepath;
       }
       throw err;
     }
@@ -100,7 +100,7 @@ export class Phase {
       if (err) return callback(err);
 
       try {
-	callback(null, Phase.parse(text, options));
+        callback(null, Phase.parse(text, options));
       } catch (err) {
         callback(err);
       }
@@ -147,9 +147,15 @@ function generateFromComplexType(ast) {
   let schema = {};
 
   ast.properties.forEach(p => {
-    if (!schema.properties) schema.properties = {};
+    if (!schema.properties && p.tt !== 'annotation') schema.properties = {};
 
-    schema.properties[p.name] = p.typeSpec && p.typeSpec.type ? { type: p.typeSpec.type } : {};
+    if (p.tt === 'annotation') {
+      if (p.hasOwnProperty('value')) {
+        schema[p.name] = p.value;
+      }
+    } else {
+      schema.properties[p.name] = p.typeSpec && p.typeSpec.type ? { type: p.typeSpec.type } : {};
+    }
 
     if (p.typeSpec && p.typeSpec.annotations) {
       // TODO required will be a built in annotation, but still shouldn't be hard-coded like this
@@ -158,6 +164,11 @@ function generateFromComplexType(ast) {
        if (!schema.required) schema.required = [];
        schema.required.push(p.name);
       }
+      p.typeSpec.annotations.forEach(a => {
+        if (a.hasOwnProperty('value')) {
+          schema.properties[p.name][a.name] = a.value;
+        }
+      })
     }
 
   });
