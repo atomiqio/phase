@@ -59,7 +59,7 @@ ws
  / lb
 
 id
- = first:[a-zA-Z_$^] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
+ = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
 
 property
  = id:id typeSpec:(space+ typeSpec) {
@@ -100,10 +100,18 @@ typeSpec
  = type:type annotations:(space+ annotations)? { return typeSpec(type, annotations ? annotations[1] : undefined )}
 
 string
- = [a-zA-Z0-9_$-]*
+ = ["]string:[a-zA-Z0-9_+#/:*.$^-]+["] {return string.join('')}
+ / [']string:[a-zA-Z0-9_+#/:*.$^-]+['] {return string.join('')}
 
 integer
- = [-0-9]*
+ = [-0-9]+
+
+float
+ = float:([-]?[0-9]*'.'[0-9]+([eE][-+]?[0-9]+)?) { var str = float.join('').split(','); return str}
+
+number
+ = float
+ / integer
 
 boolean
  = 'true'
@@ -120,16 +128,13 @@ structure
  / array
 
 argument
- = ['] argument:string ['] { return argument.join('')}
- / ["] argument:string ["] { return argument.join('')}
+ = string
  / argument:structure { return JSON.parse(argument) }
- / argument:typeSpec
- / argument:annotation
  / argument:boolean { return JSON.parse(argument) }
- / argument:integer { return parseInt(argument.join('')) }
+ / argument:number {return JSON.parse(argument.join(''))}
 
 arguments
- = arguments:((argument ([,] space+))+ argument) { function trueArg(value){return value[0] !== ',' && value[1] !== ' '}; 
+ = arguments:((argument ([,] space*))+ argument) { function trueArg(value){return value[0] !== ',' && value[1] !== ' '}; 
     var args = [];
     arguments[0].forEach(function(a) {
       if (Array.isArray(a)) {
@@ -158,4 +163,3 @@ annotations
 propertyOrAnnotation
  = property
  / annotation
-
