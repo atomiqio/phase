@@ -89,16 +89,31 @@
 
     return num;
   }
+
+  function string(text) {
+    return {
+      tag: 'string',
+      text: text,
+      value: text.substring(1, text.length-1)
+    };
+  }
 }
 
 start
 // = schema
 
-   = number
+ = string
+ / number
 
 // ===== simple tokens
 
 sign = [+-]
+
+// ===== string
+
+string
+ = str:("'" [^']* "'") { return string(str[0] + str[1].join('') + str[2]) }
+ / str:('"' [^"]* '"') { return string(str[0] + str[1].join('') + str[2]) }
 
 // ===== number
 // * integer literal

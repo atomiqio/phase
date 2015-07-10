@@ -137,6 +137,20 @@ describe('basic parser tests', function () {
     });
   };
 
+  describe('string tests', function() {
+
+    test("'hello'", {
+      tag: 'string',
+      text: "'hello'",
+      value: 'hello'
+    });
+
+    test('"hello"', "hello");
+    test('""', "");
+    test("''", "");
+
+  });
+
   describe('numbers', function () {
 
     describe('integer tests', function() {
