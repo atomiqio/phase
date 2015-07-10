@@ -137,6 +137,19 @@ describe('basic parser tests', function () {
     });
   };
 
+  describe('null and undefined type tests', function() {
+
+    test("null", {
+      tag: "null",
+      text: "null",
+      value: null,
+      type: 'object'
+    });
+
+    test("undefined", undefined);
+
+  });
+
   describe('string tests', function() {
 
     test("'hello'", {

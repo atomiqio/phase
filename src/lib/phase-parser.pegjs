@@ -97,6 +97,23 @@
       value: text.substring(1, text.length-1)
     };
   }
+
+  function null_t(text) {
+    return {
+      tag: 'null',
+      text: text,
+      value: null,
+      type: typeof null
+    };
+  }
+
+  function undefined_t(text) {
+    return {
+      tag: 'undefined',
+      text: text,
+      value: undefined
+    };
+  }
 }
 
 start
@@ -104,10 +121,15 @@ start
 
  = string
  / number
+ / undefined
+ / null
 
 // ===== simple tokens
 
 sign = [+-]
+null = s:('n' 'u' 'l' 'l') { return null_t(s.join('')) }
+undefined = s:('u' 'n' 'd' 'e' 'f' 'i' 'n' 'e' 'd') { return undefined_t(s.join('')) }
+
 
 // ===== string
 
