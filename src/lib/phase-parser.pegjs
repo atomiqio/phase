@@ -122,6 +122,14 @@
       value: text === 'true'
     }
   }
+
+  function array(text, value) {
+    return {
+      tag: 'array',
+      text: text,
+      value: value
+    }
+  }
 }
 
 start
@@ -131,8 +139,8 @@ start
 
 type
 // = 'object'
- //= 'array'
- = boolean
+ = array
+ / boolean
  / string
  / number
  / undefined
@@ -145,10 +153,31 @@ sign = [+-]
 null = s:('n' 'u' 'l' 'l') { return null_t(s.join('')) }
 undefined = s:('u' 'n' 'd' 'e' 'f' 'i' 'n' 'e' 'd') { return undefined_t(s.join('')) }
 
+// ===== whitespace
+
+lb
+ = [\r\n]
+
+space
+ = [ \t]
+
+ws
+ = space
+ / lb
+
+list
+ = type:type types:(ws* ',' ws* type)* {
+   return [type].concat(types.map(function(t) { return t[3] }));
+ }
+
 // ===== array
 
 array
- = '['  ']'
+ = str:('[' ws* list? ws* ']') {
+   var list = str[2] || [];
+   list = list.map(function(l) { return l.text; }).join(',');
+   return array('[' + list + ']', str[2]);
+ }
 
 // ===== boolean
 
@@ -214,18 +243,6 @@ schema
  = ws* typeSpec:typeSpec ws* { return typeSpec }
  / ws* complexType:complexType ws* { return complexType }
  / ws+ { return }
-
-// ===== whitespace
-
-lb
- = [\r\n]
-
-space
- = [ \t]
-
-ws
- = space
- / lb
 
 id
  = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }

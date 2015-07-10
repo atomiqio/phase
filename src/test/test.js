@@ -127,9 +127,27 @@ describe('basic parser tests', function () {
 
     it ('should parse ' + descr, function() {
       var ast = parse(input);
-      if (typeof expected == 'object') {
+
+      var type = typeof expected;
+
+      if (Array.isArray(expected)) {
+
+        function mapParsed(a) {
+          return a.tag
+            ? Array.isArray(a.value)
+              ? a.value.map(function (e) { return mapParsed(e); })
+              : a.value
+            : a;
+        }
+
+        var values = mapParsed(ast);
+        if (isEqual(values, expected)) return;
+        throw new Error(format('Expected \n%j\nActual\n%j\n', expected, values));
+
+      } else if (type == 'object') {
         if (isEqual(ast, expected)) return;
         throw new Error(format('Expected \n%j\nActual\n%j\n', expected, ast));
+
       } else {
         if (ast.value === expected) return;
         throw new Error(format('Expected \n%j\nActual\n%j\n', expected, ast.value));
@@ -260,7 +278,26 @@ describe('basic parser tests', function () {
 
     });
 
+  });
 
+  describe('array tests', function() {
+
+    test("[1]", {
+      tag: 'array',
+      text: "[1]",
+      value: [{
+        tag: 'number',
+        text: '1',
+        value: 1,
+        type: 'integer'
+      }]
+    });
+
+    test("[1]", [1]);
+    test("[ 1, 2.0, 'three', false, true ]", [1, 2.0, 'three', false, true]);
+    test("[undefined, null]", [undefined, null]);
+    test("[ 1, 2, [3,4] ]", [1, 2, [3,4]]);
+    test("[ [ [1, 2], [3, 4] ], [ 5, 6 ] ]", [ [ [1, 2], [3, 4] ], [ 5, 6 ] ]);
 
   });
 
