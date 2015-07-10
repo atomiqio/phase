@@ -114,15 +114,30 @@
       value: undefined
     };
   }
+
+  function boolean(text) {
+    return {
+      tag: "boolean",
+      text: text,
+      value: text === 'true'
+    }
+  }
 }
 
 start
 // = schema
+ = type
 
- = string
+
+type
+// = 'object'
+ //= 'array'
+ = boolean
+ / string
  / number
  / undefined
  / null
+
 
 // ===== simple tokens
 
@@ -130,6 +145,16 @@ sign = [+-]
 null = s:('n' 'u' 'l' 'l') { return null_t(s.join('')) }
 undefined = s:('u' 'n' 'd' 'e' 'f' 'i' 'n' 'e' 'd') { return undefined_t(s.join('')) }
 
+// ===== array
+
+array
+ = '['  ']'
+
+// ===== boolean
+
+boolean
+ = str:('t' 'r' 'u' 'e') { return boolean(str.join('')) }
+ / str:('f' 'a' 'l' 's' 'e') { return boolean(str.join('')) }
 
 // ===== string
 

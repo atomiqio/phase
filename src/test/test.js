@@ -150,6 +150,22 @@ describe('basic parser tests', function () {
 
   });
 
+  describe('boolean type tests', function() {
+
+    test("false", {
+      tag: 'boolean',
+      text: 'false',
+      value: false
+    });
+
+    test("true", {
+      tag: 'boolean',
+      text: 'true',
+      value: true
+    });
+
+  });
+
   describe('string tests', function() {
 
     test("'hello'", {
