@@ -29,10 +29,124 @@
     }
   }
 
+  function annotationWithArg(name, value) {
+    return {
+      tt: 'annotation',
+      name: name,
+      value: value
+    }
+  }
+
+  function dump(value) {
+    return {
+      value: value,
+      type: typeof value
+    }
+  }
+
+  function number(text, type) {
+    var sign, value, error, num, base, input = text;
+
+    num = {
+      tag: 'number',
+      text: input
+    };
+
+    if (type == 'float') {
+      try {
+        num.value = parseFloat(input);
+        num.type = type;
+
+      } catch (err) {
+        error = err.message;
+      }
+
+    } else {
+      try {
+        if (/[+-]/.test(text[0])) {
+          sign = text[0];
+          text = text.substr(1);
+        }
+
+        base = 10;
+        if (text[0] === '0') {
+          if (/[xX]/.test(text[1])) {
+            base = 16;
+          } else {
+            base = 8;
+          }
+        }
+
+        num.value = parseInt(input, base);
+        num.type = type;
+
+      } catch (err) {
+        error = err.message;
+      }
+    }
+
+    if (error) num.error = error;
+
+    return num;
+  }
 }
 
 start
- = schema
+// = schema
+
+   = number
+
+// ===== simple tokens
+
+sign = [+-]
+
+// ===== number
+// * integer literal
+// * floating-point literal
+
+number
+ = float
+ / integer
+ / nan
+ / infinity
+
+digit
+ = [0-9]
+
+hexdigit
+ = [0-9a-fA-F]
+
+// [sign][0[(x|X)]](digits|hexdigit)
+integer
+ = sign:sign? '0' hex:[xX] hexdigits:hexdigit+ {
+   return number((sign || '') + '0' + hex + hexdigits.join(''), "integer")
+ }
+ / sign:sign? '0' digits:digit+ {
+   return number((sign || '') + '0' + digits.join(''), "integer")
+ }
+ / sign:sign? digits:digit+ {
+   return number((sign || '') + digits.join(''), "integer")
+ }
+
+// [sign][digits].digits[(E|e)[(+|-)]digits]
+float
+ = sign:sign? int:digit* '.' mantissa:digit+ exp:([eE] sign? digit+)? {
+   return number((sign || '') + (int ? int.join('') : '') + '.'
+     + mantissa.join('') + (exp ? exp.join('')  : ''), "float")
+ }
+
+nan
+ = 'N' 'a' 'N' { return number("NaN", typeof(NaN)) }
+
+infinity
+ = sign:[+-]? 'I' 'n' 'f' 'i' 'n' 'i' 't' 'y' {
+     return number((sign || '') + 'Infinity', typeof(Infinity))
+   }
+
+
+
+
+/*
 
 schema
  = ws* typeSpec:typeSpec ws* { return typeSpec }
@@ -92,8 +206,56 @@ type
 typeSpec
  = type:type annotations:(space+ annotations)? { return typeSpec(type, annotations ? annotations[1] : undefined )}
 
+string
+ = [a-zA-Z0-9_$-]+
+
+integer
+ = [-0-9]*
+
+boolean
+ = 'true'
+ / 'false'
+
+object
+ = '{}'
+
+array
+ = '[]'
+
+structure
+ = object
+ / array
+
+argument
+ = ['] argument:string ['] { return argument.join('')}
+ / ["] argument:string ["] { return argument.join('')}
+ / argument:structure { return JSON.parse(argument) }
+ / argument:typeSpec
+ / argument:annotation
+ / argument:boolean { return JSON.parse(argument) }
+ / argument:integer { return parseInt(argument.join('')) }
+
+arguments
+ = arguments:((argument ([,] space+))+ argument) { function trueArg(value){return value[0] !== ',' && value[1] !== ' '}; 
+    var args = [];
+    arguments[0].forEach(function(a) {
+      if (Array.isArray(a)) {
+        a.forEach(function(v) {
+          if (trueArg(v)) {
+            args.push(v)
+          }
+        })
+      }
+    })
+    args.push(arguments[arguments.length-1]);
+    return args
+}
+
 annotation
- = '@' id:id { return annotation(id) }
+ = '@' id:id '(' args:arguments ')' { return annotationWithArg(id, args) }
+ / '@' id:id '(' argument:argument ')' { return annotationWithArg(id, argument) } 
+ / '@' id:id '(' space* ')' { return annotation(id) }
+ / '@' id:id { return annotation(id) }
 
 annotations
  = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
@@ -105,3 +267,4 @@ propertyOrAnnotation
  / annotation
 
 
+*/

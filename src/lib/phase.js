@@ -58,11 +58,13 @@ export class Phase {
       throw err;
     }
 
-    // transform the phase schema to standard JSON schema
-    phase.schema = transform(phase.ast);
+    if (options && !options.no_transform) {
+      // transform the phase schema to standard JSON schema
+      phase.schema = transform(phase.ast);
 
-    // create a validator for the JSON schema
-    phase.validator = validatorFactory(phase.schema);
+      // create a validator for the JSON schema
+      phase.validator = validatorFactory(phase.schema);
+    }
 
     return phase;
   }
