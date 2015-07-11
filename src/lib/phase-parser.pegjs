@@ -120,7 +120,7 @@
       tag: "boolean",
       text: text,
       value: text === 'true'
-    }
+    };
   }
 
   function array(text, value) {
@@ -128,8 +128,22 @@
       tag: 'array',
       text: text,
       value: value
-    }
+    };
   }
+
+  function object(text, props) {
+    var o = {};
+    props.forEach(function(p) {
+      o[p[0]] = p[1];
+    });
+
+    return {
+      tag: "object",
+      text: text,
+      value: o
+    };
+  }
+
 }
 
 start
@@ -138,20 +152,14 @@ start
 
 
 type
-// = 'object'
- = array
- / boolean
+ = boolean
  / string
  / number
  / undefined
  / null
+ / array
+ / object
 
-
-// ===== simple tokens
-
-sign = [+-]
-null = s:('n' 'u' 'l' 'l') { return null_t(s.join('')) }
-undefined = s:('u' 'n' 'd' 'e' 'f' 'i' 'n' 'e' 'd') { return undefined_t(s.join('')) }
 
 // ===== whitespace
 
@@ -165,9 +173,32 @@ ws
  = space
  / lb
 
+// ===== Common Productions
+
+sign = [+-]
+null = s:('n' 'u' 'l' 'l') { return null_t(s.join('')) }
+undefined = s:('u' 'n' 'd' 'e' 'f' 'i' 'n' 'e' 'd') { return undefined_t(s.join('')) }
+
+id = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
+
 list
  = type:type types:(ws* ',' ws* type)* {
    return [type].concat(types.map(function(t) { return t[3] }));
+ }
+
+// ===== object
+
+property
+ = key:string ws* ':' ws* value:type { return [key.value, value] }
+
+propertyList
+ = prop:property props:(ws* ',' ws* property)* {
+   return [prop].concat(props.map(function(p) { return p[3] }));
+ }
+
+object
+ = '{' ws* props:propertyList? ws* '}' {
+   return object(text(), props || []);
  }
 
 // ===== array

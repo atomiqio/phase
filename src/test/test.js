@@ -128,25 +128,41 @@ describe('basic parser tests', function () {
     it ('should parse ' + descr, function() {
       var ast = parse(input);
 
-      var type = typeof expected;
-
       if (Array.isArray(expected)) {
 
-        function mapParsed(a) {
+        function toArray(a) {
           return a.tag
             ? Array.isArray(a.value)
-              ? a.value.map(function (e) { return mapParsed(e); })
+              ? a.value.map(function (e) { return toArray(e); })
               : a.value
             : a;
         }
 
-        var values = mapParsed(ast);
+        var values = toArray(ast);
         if (isEqual(values, expected)) return;
         throw new Error(format('Expected \n%j\nActual\n%j\n', expected, values));
 
-      } else if (type == 'object') {
-        if (isEqual(ast, expected)) return;
-        throw new Error(format('Expected \n%j\nActual\n%j\n', expected, ast));
+      } else if (typeof expected == 'object') {
+
+        if (ast.tag == 'object') {
+
+          function toObject(ast) {
+            var o = {};
+            Object.keys(ast.value).forEach(function(key) {
+              o[key] = ast.value[key].value;
+            });
+            return o;
+          }
+
+          var o = toObject(ast);
+          if (isEqual(o, expected)) return;
+          throw new Error(format('Expected \n%j\nActual\n%j\n', expected, o));
+
+        } else {
+          // TODO this is no longer needed, should probably remove
+          if (isEqual(ast, expected)) return;
+          throw new Error(format('Expected \n%j\nActual\n%j\n', expected, ast));
+        }
 
       } else {
         if (ast.value === expected) return;
@@ -277,6 +293,12 @@ describe('basic parser tests', function () {
       });
 
     });
+
+  });
+
+  describe('object tests', function() {
+
+    test('{ "foo" : "bar" }', { foo: 'bar' });
 
   });
 
