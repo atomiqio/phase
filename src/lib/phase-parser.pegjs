@@ -1,4 +1,113 @@
 {
+  // ===== core types
+
+  function null_t(text) {
+    return {
+      tag: 'null',
+      text: text,
+      value: null,
+      type: 'object'
+    };
+  }
+
+  function undefined_t(text) {
+    return {
+      tag: 'undefined',
+      text: text,
+      value: undefined,
+      type: 'undefined'
+    };
+  }
+
+  function number(text, format) {
+    var sign, value, error, num, base, input = text;
+
+    num = {
+      tag: 'number',
+      text: input,
+      type: 'number',
+      format: format
+    };
+
+    if (format == 'float') {
+      try {
+        num.value = parseFloat(input);
+
+      } catch (err) {
+        error = err.message;
+      }
+
+    } else {
+      try {
+        if (/[+-]/.test(text[0])) {
+          sign = text[0];
+          text = text.substr(1);
+        }
+
+        base = 10;
+        if (text[0] === '0') {
+          if (/[xX]/.test(text[1])) {
+            base = 16;
+          } else {
+            base = 8;
+          }
+        }
+
+        num.value = parseInt(input, base);
+
+      } catch (err) {
+        error = err.message;
+      }
+    }
+
+    if (error) num.error = error;
+
+    return num;
+  }
+
+  function string(text) {
+    return {
+      tag: 'string',
+      text: text,
+      value: text.substring(1, text.length-1),
+      type: 'string'
+    };
+  }
+
+  function boolean(text) {
+    return {
+      tag: 'boolean',
+      text: text,
+      value: text === 'true',
+      type: 'boolean'
+    };
+  }
+
+  function array(text, value) {
+    return {
+      tag: 'array',
+      text: text,
+      value: value,
+      type: 'object'
+    };
+  }
+
+  function object(text, props) {
+    var o = {};
+    props.forEach(function(p) {
+      o[p[0]] = p[1];
+    });
+
+    return {
+      tag: 'object',
+      text: text,
+      value: o,
+      type: 'object'
+    };
+  }
+
+  // =====
+
   function typeSpec(type, annotations) {
     return {
       tt: 'typeSpec',
@@ -42,106 +151,6 @@
       value: value,
       type: typeof value
     }
-  }
-
-  function number(text, type) {
-    var sign, value, error, num, base, input = text;
-
-    num = {
-      tag: 'number',
-      text: input
-    };
-
-    if (type == 'float') {
-      try {
-        num.value = parseFloat(input);
-        num.type = type;
-
-      } catch (err) {
-        error = err.message;
-      }
-
-    } else {
-      try {
-        if (/[+-]/.test(text[0])) {
-          sign = text[0];
-          text = text.substr(1);
-        }
-
-        base = 10;
-        if (text[0] === '0') {
-          if (/[xX]/.test(text[1])) {
-            base = 16;
-          } else {
-            base = 8;
-          }
-        }
-
-        num.value = parseInt(input, base);
-        num.type = type;
-
-      } catch (err) {
-        error = err.message;
-      }
-    }
-
-    if (error) num.error = error;
-
-    return num;
-  }
-
-  function string(text) {
-    return {
-      tag: 'string',
-      text: text,
-      value: text.substring(1, text.length-1)
-    };
-  }
-
-  function null_t(text) {
-    return {
-      tag: 'null',
-      text: text,
-      value: null,
-      type: typeof null
-    };
-  }
-
-  function undefined_t(text) {
-    return {
-      tag: 'undefined',
-      text: text,
-      value: undefined
-    };
-  }
-
-  function boolean(text) {
-    return {
-      tag: "boolean",
-      text: text,
-      value: text === 'true'
-    };
-  }
-
-  function array(text, value) {
-    return {
-      tag: 'array',
-      text: text,
-      value: value
-    };
-  }
-
-  function object(text, props) {
-    var o = {};
-    props.forEach(function(p) {
-      o[p[0]] = p[1];
-    });
-
-    return {
-      tag: "object",
-      text: text,
-      value: o
-    };
   }
 
 }

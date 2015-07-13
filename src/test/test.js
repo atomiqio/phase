@@ -175,9 +175,9 @@ describe('basic parser tests', function () {
 
     test("null", {
       tag: "null",
+      type: 'object',
       text: "null",
-      value: null,
-      type: 'object'
+      value: null
     });
 
     test("undefined", undefined);
@@ -188,12 +188,14 @@ describe('basic parser tests', function () {
 
     test("false", {
       tag: 'boolean',
+      type: 'boolean',
       text: 'false',
       value: false
     });
 
     test("true", {
       tag: 'boolean',
+      type: 'boolean',
       text: 'true',
       value: true
     });
@@ -204,6 +206,7 @@ describe('basic parser tests', function () {
 
     test("'hello'", {
       tag: 'string',
+      type: 'string',
       text: "'hello'",
       value: 'hello'
     });
@@ -219,23 +222,26 @@ describe('basic parser tests', function () {
     describe('integer tests', function() {
       test('1', {
         tag: 'number',
+        type: 'number',
+        format: 'integer',
         text: '1',
-        value: 1,
-        type: 'integer'
+        value: 1
       });
 
       test('+1', {
         tag: 'number',
+        type: 'number',
+        format: 'integer',
         text: '+1',
-        value: 1,
-        type: 'integer'
+        value: 1
       });
 
       test('-1', {
         tag: 'number',
+        type: 'number',
+        format: 'integer',
         text: '-1',
-        value: -1,
-        type: 'integer'
+        value: -1
       });
 
       test('1234567890', 1234567890);
@@ -243,9 +249,10 @@ describe('basic parser tests', function () {
 
       test('011 as octal', '011', {
         tag: 'number',
+        type: 'number',
+        format: 'integer',
         text: '011',
-        value: 9,
-        type: 'integer'
+        value: 9
       });
 
       test('010', 8);
@@ -254,9 +261,10 @@ describe('basic parser tests', function () {
 
       test('0x11 as hexadecimal', '0x11', {
         tag: 'number',
+        type: 'number',
+        format: 'integer',
         text: '0x11',
-        value: 17,
-        type: 'integer'
+        value: 17
       });
 
       test('0XFF as hexadecimal', '0XFF', 255);
@@ -268,16 +276,18 @@ describe('basic parser tests', function () {
 
       test('0.1', {
         tag: 'number',
+        type: 'number',
+        format: 'float',
         text: '0.1',
-        value: 0.1,
-        type: 'float'
+        value: 0.1
       });
 
       test('1.2E-3', {
         tag: 'number',
+        type: 'number',
+        format: 'float',
         text: '1.2E-3',
-        value: 1.2E-3,
-        type: 'float'
+        value: 1.2E-3
       });
 
       test('.3', 0.3);
@@ -287,9 +297,10 @@ describe('basic parser tests', function () {
       test('-12.12E-1', -12.12E-1);
       test('-12.12E-1', {
         tag: 'number',
+        type: 'number',
+        format: 'float',
         text: '-12.12E-1',
-        value: -12.12E-1,
-        type: 'float'
+        value: -12.12E-1
       });
 
     });
@@ -306,12 +317,14 @@ describe('basic parser tests', function () {
 
     test("[1]", {
       tag: 'array',
+      type: 'object',
       text: "[1]",
       value: [{
         tag: 'number',
+        type: 'number',
+        format: 'integer',
         text: '1',
-        value: 1,
-        type: 'integer'
+        value: 1
       }]
     });
 
