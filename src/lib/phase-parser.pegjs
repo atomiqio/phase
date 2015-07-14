@@ -1,241 +1,87 @@
 {
-  // ===== core types
-
-  function null_t(text) {
-    return {
-      tag: 'null',
-      text: text,
-      value: null,
-      type: 'object'
-    };
-  }
-
-  function undefined_t(text) {
-    return {
-      tag: 'undefined',
-      text: text,
-      value: undefined,
-      type: 'undefined'
-    };
-  }
-
-  function number(text, format) {
-    var sign, value, error, num, base, input = text;
-
-    num = {
-      tag: 'number',
-      text: input,
-      type: 'number',
-      format: format
-    };
-
-    if (format == 'float') {
-      try {
-        num.value = parseFloat(input);
-
-      } catch (err) {
-        error = err.message;
-      }
-
-    } else {
-      try {
-        if (/[+-]/.test(text[0])) {
-          sign = text[0];
-          text = text.substr(1);
-        }
-
-        base = 10;
-        if (text[0] === '0') {
-          if (/[xX]/.test(text[1])) {
-            base = 16;
-          } else {
-            base = 8;
-          }
-        }
-
-        num.value = parseInt(input, base);
-
-      } catch (err) {
-        error = err.message;
-      }
-    }
-
-    if (error) num.error = error;
-
-    return num;
-  }
-
-  function string(text) {
-    return {
-      tag: 'string',
-      text: text,
-      value: text.substring(1, text.length-1),
-      type: 'string'
-    };
-  }
-
-  function boolean(text) {
-    return {
-      tag: 'boolean',
-      text: text,
-      value: text === 'true',
-      type: 'boolean'
-    };
-  }
-
-  function array(text, value) {
-    return {
-      tag: 'array',
-      text: text,
-      value: value,
-      type: 'object'
-    };
-  }
-
-  function object(text, props) {
-    var o = {};
-    props.forEach(function(p) {
-      o[p[0]] = p[1];
-    });
-
-    return {
-      tag: 'object',
-      text: text,
-      value: o,
-      type: 'object'
-    };
-  }
-
-  // =====
-
-  function typeSpec(type, annotations) {
-    return {
-      tt: 'typeSpec',
-      type: type,
-      annotations: annotations || []
-    }
-  }
-
-  function property(id, typeSpec) {
-    return {
-      tt: 'property',
-      name: id,
-      typeSpec: typeSpec
-    }
-  }
-
-  function complexType(properties) {
-    return {
-      tt: 'complexType',
-      properties: properties
-    }
-  }
-
-  function annotation(name) {
-    return {
-      tt: 'annotation',
-      name: name
-    }
-  }
-
-  function annotationWithArg(name, value) {
-    return {
-      tt: 'annotation',
-      name: name,
-      value: value
-    }
-  }
-
-  function dump(value) {
-    return {
-      value: value,
-      type: typeof value
-    }
-  }
-
+  var t = require('./phase-node-types');
 }
 
 start
-// = schema
- = type
+ = schema
 
+schema
+ = literal
+ / type
 
-type
- = boolean
- / string
- / number
- / undefined
- / null
- / array
- / object
-
+literal
+ = booleanLiteral
+ / stringLiteral
+ / numberLiteral
+ / undefinedLiteral
+ / nullLiteral
+ / arrayLiteral
+ / objectLiteral
 
 // ===== whitespace
 
-lb
- = [\r\n]
-
-space
- = [ \t]
-
-ws
- = space
- / lb
+space = [ \t]
+lb = [\r\n]
+ws = space / lb
 
 // ===== Common Productions
 
 sign = [+-]
-null = s:('n' 'u' 'l' 'l') { return null_t(s.join('')) }
-undefined = s:('u' 'n' 'd' 'e' 'f' 'i' 'n' 'e' 'd') { return undefined_t(s.join('')) }
 
 id = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
 
 list
- = type:type types:(ws* ',' ws* type)* {
-   return [type].concat(types.map(function(t) { return t[3] }));
+ = literal:literal literals:(ws* ',' ws* literal)* {
+   return [literal].concat(literals.map(function(v) { return v[3] }));
  }
 
-// ===== object
+// ===== undefined literal
+
+undefinedLiteral = s:'undefined' { return t.undefinedLiteral(s) }
+
+// ===== null literal
+
+nullLiteral = s:'null' { return t.nullLiteral(s) }
+
+// ===== object literal
 
 property
- = key:string ws* ':' ws* value:type { return [key.value, value] }
+ = key:stringLiteral ws* ':' ws* literal:literal { return [key.value, literal] }
 
 propertyList
  = prop:property props:(ws* ',' ws* property)* {
    return [prop].concat(props.map(function(p) { return p[3] }));
  }
 
-object
+objectLiteral
  = '{' ws* props:propertyList? ws* '}' {
-   return object(text(), props || []);
+   return t.objectLiteral(text(), props || []);
  }
 
-// ===== array
+// ===== array literal
 
-array
+arrayLiteral
  = str:('[' ws* list? ws* ']') {
    var list = str[2] || [];
    list = list.map(function(l) { return l.text; }).join(',');
-   return array('[' + list + ']', str[2]);
+   return t.arrayLiteral('[' + list + ']', str[2]);
  }
 
-// ===== boolean
+// ===== boolean literal
 
-boolean
- = str:('t' 'r' 'u' 'e') { return boolean(str.join('')) }
- / str:('f' 'a' 'l' 's' 'e') { return boolean(str.join('')) }
+booleanLiteral
+ = s:'true' { return t.booleanLiteral(s) }
+ / s:'false' { return t.booleanLiteral(s) }
 
-// ===== string
+// ===== string literal
 
-string
- = str:("'" [^']* "'") { return string(str[0] + str[1].join('') + str[2]) }
- / str:('"' [^"]* '"') { return string(str[0] + str[1].join('') + str[2]) }
+stringLiteral
+ = str:("'" [^']* "'") { return t.stringLiteral(str[0] + str[1].join('') + str[2]) }
+ / str:('"' [^"]* '"') { return t.stringLiteral(str[0] + str[1].join('') + str[2]) }
 
-// ===== number
-// * integer literal
-// * floating-point literal
+// ===== number literal (integer and floating-point)
 
-number
+numberLiteral
  = float
  / integer
  / nan
@@ -250,29 +96,64 @@ hexdigit
 // [sign][0[(x|X)]](digits|hexdigit)
 integer
  = sign:sign? '0' hex:[xX] hexdigits:hexdigit+ {
-   return number((sign || '') + '0' + hex + hexdigits.join(''), "integer")
+   return t.numberLiteral((sign || '') + '0' + hex + hexdigits.join(''), "integer")
  }
  / sign:sign? '0' digits:digit+ {
-   return number((sign || '') + '0' + digits.join(''), "integer")
+   return t.numberLiteral((sign || '') + '0' + digits.join(''), "integer")
  }
  / sign:sign? digits:digit+ {
-   return number((sign || '') + digits.join(''), "integer")
+   return t.numberLiteral((sign || '') + digits.join(''), "integer")
  }
 
 // [sign][digits].digits[(E|e)[(+|-)]digits]
 float
  = sign:sign? int:digit* '.' mantissa:digit+ exp:([eE] sign? digit+)? {
-   return number((sign || '') + (int ? int.join('') : '') + '.'
+   return t.numberLiteral((sign || '') + (int ? int.join('') : '') + '.'
      + mantissa.join('') + (exp ? exp.join('')  : ''), "float")
  }
 
 nan
- = 'N' 'a' 'N' { return number("NaN", typeof(NaN)) }
+ = 'NaN' { return t.numberLiteral("NaN", typeof(NaN)) }
 
 infinity
- = sign:[+-]? 'I' 'n' 'f' 'i' 'n' 'i' 't' 'y' {
-     return number((sign || '') + 'Infinity', typeof(Infinity))
+ = sign:[+-]? 'Infinity' {
+     return t.numberLiteral((sign || '') + 'Infinity', typeof(Infinity))
    }
+
+// ===== types
+
+type
+ = s:'array' { return t.type(s) }
+ / s:'boolean' { return t.type(s) }
+ / s:'number' { return t.type(s) }
+ / s:'object' { return t.type(s) }
+ / s:'string' { return t.type(s) }
+ / u:union { return t.type(u) }
+
+union
+ = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
+     return [t.type(type)].concat(types.map(function(type) {
+       return t.type(type[3]);
+     }))
+   }
+
+// ===== annotation
+
+annotation
+ = '@' id:id '(' args:arguments ')' { return annotationWithArg(id, args) }
+ / '@' id:id '(' argument:argument ')' { return annotationWithArg(id, argument) }
+ / '@' id:id '(' space* ')' { return annotation(id) }
+ / '@' id:id { return annotation(id) }
+
+annotations
+ = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
+     return a[1]
+   }))}
+
+propertyOrAnnotation
+ = property
+ / annotation
+
 
 
 
@@ -355,7 +236,7 @@ argument
  / argument:integer { return parseInt(argument.join('')) }
 
 arguments
- = arguments:((argument ([,] space+))+ argument) { function trueArg(value){return value[0] !== ',' && value[1] !== ' '}; 
+ = arguments:((argument ([,] space+))+ argument) { function trueArg(value){return value[0] !== ',' && literal[1] !== ' '};
     var args = [];
     arguments[0].forEach(function(a) {
       if (Array.isArray(a)) {

@@ -1,7 +1,7 @@
 import parser from './phase-parser';
 import { readFile, readFileSync } from 'fs';
 import ZSchema from 'z-schema';
-import { includes, find } from 'lodash';
+import { find } from 'lodash';
 
 /**
  * Factory for creating an official JSON Schema validator
