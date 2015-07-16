@@ -2,21 +2,21 @@
 // Parsed literal values (primitives, objects, & arrays)
 // ========================================================
 
-exports.nullLiteral = function(text) {
-  return {
-    tag: 'null',
-    type: typeof null,
-    text: text,
-    value: null
-  }
-}
-
-exports.undefinedLiteral = function(text) {
+exports.undefinedLiteral = function() {
   return {
     tag: 'undefined',
     type: typeof undefined,
-    text: text,
+    text: 'undefined',
     value: undefined
+  }
+}
+
+exports.nullLiteral = function() {
+  return {
+    tag: 'null',
+    type: typeof null,
+    text: 'null',
+    value: null
   }
 }
 
@@ -34,7 +34,7 @@ exports.stringLiteral = function(text) {
     tag: 'string',
     type: 'string',
     text: text,
-    value: text.substring(1, text.length - 1)
+    value: text
   };
 }
 

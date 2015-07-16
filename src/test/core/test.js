@@ -117,6 +117,17 @@ describe('string literals', function () {
   test('""', "");
   test("''", "");
 
+  test("'\\t'", "'\t'", "\t");
+  test("'\\r\\n'", "'\r\n'", "\r\n");
+
+  // troublemakers:
+  test("'\\'", "'\\'", "\\");
+  test('"don\'t"', "don't");
+  test('"don\'t"', "don\'t");
+
+  // TODO worst troublemaker - cannot pass
+  // test("'don\'t'", "don\'t");
+
 });
 
 describe('numbers', function () {
@@ -238,7 +249,7 @@ describe('array literals', function () {
 
 });
 
-describe('type literals', function() {
+describe('type keywords', function() {
 
   test('boolean', 'boolean');
   test('number', 'number');
@@ -246,7 +257,7 @@ describe('type literals', function() {
   test('object', 'object');
   test('array', 'array');
 
-  // union literal
+  // union type
   test('[ boolean, number, string, object, array ]', [
     { tag: 'type', 'type': 'boolean', text: 'boolean', value: 'boolean' },
     { tag: 'type', 'type': 'number', text: 'number', value: 'number' },
@@ -259,5 +270,5 @@ describe('type literals', function() {
 
 describe('annotations', function() {
 
-
 });
+
