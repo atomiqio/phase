@@ -1,5 +1,9 @@
 describe('core parser tests', function() {
-  require('./core/test');
+  require('./samples/test');
+})
+
+describe('core parser tests', function() {
+  //require('./core/test');
 });
 
 describe('schema parser tests', function() {

@@ -10,8 +10,75 @@ start
   = schema
 
 schema
+  = ws* type:annotatedType ws* [;]? { return type }
+  / ws* decl:declaration ws* { return decl }
+  / ws* complexDecl:complexDeclaration ws* { return complexDecl }
+  / ws* { return null }
+
+
+space = [ \t]
+lb = [\r\n]
+ws = space / lb
+
+
+/*
+type
+  = "boolean"
+  / "number"
+  / "string"
+  / "array"
+*/
+
+
+type
+  = s:'array' { return t.type(s) }
+  / s:'boolean' { return t.type(s) }
+  / s:'number' { return t.type(s) }
+  / s:'object' { return t.type(s) }
+  / s:'string' { return t.type(s) }
+  / u:union { return t.type(u) }
+
+union
+  = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
+      return [t.type(type)].concat(types.map(function(type) {
+        return t.type(type[3]);
+      }))
+    }
+
+
+annotation
+  = '@' ann:id args:arguments? { return { annotation:ann, arguments:args } }
+
+argument
   = literal
-  / type
+
+arguments
+  = "(" ws* arg:argument args:(ws* ',' ws* argument)* ws* ")" {
+      return [arg].concat(args.map(function(e) { return e[3] }))
+    }
+
+annotatedType
+  = type:type list:(ws+ annotation)* {
+      return { type: type, annotations: list.map(function(e) { return e[1] }) }
+    }
+
+declaration
+  = id:id ws+ at:annotatedType space* [;\r\n] { return { id:id, type:at } }
+  / id:id ws+ at:annotatedType space* &'}' { return { id:id, type:at } }
+  / id:id ws+ decl:complexDeclaration { return { id:id, complexType:decl } }
+
+declarationList
+  = decl:declaration list:(ws* declaration)* {
+      return [decl].concat(list.map(function(e) { return e[1] } ))
+    }
+
+
+id = [a-zA-Z_$] [a-zA-Z0-9_$]* { /* TODO return node */ return text() }
+
+complexDeclaration
+  = "{" ws* decl:declarationList? ws* "}" { return decl || {} }
+
+// ================================================================================
 
 literal
   = booleanLiteral
@@ -32,7 +99,6 @@ ws = space / lb
 
 sign = [+-]
 
-id = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { /* TODO return node */ return text() }
 
 list
   = literal:literal literals:(ws* ',' ws* literal)* {
@@ -136,7 +202,7 @@ integer
 float
   = sign:sign? int:digit* '.' mantissa:digit+ exp:([eE] sign? digit+)? {
       return t.numberLiteral((sign || '') + (int ? int.join('') : '') + '.'
-        + mantissa.join('') + (exp ? exp.join('')  : ''), "float")
+        + mantissa.join('') + (exp ? exp[0] + (exp[1] || '') + exp[2].join('')  : ''), "float")
     }
 
 nan
@@ -147,151 +213,3 @@ infinity
       return t.numberLiteral((sign || '') + 'Infinity', typeof(Infinity))
     }
 
-// ===== types
-
-type
-  = s:'array' { return t.type(s) }
-  / s:'boolean' { return t.type(s) }
-  / s:'number' { return t.type(s) }
-  / s:'object' { return t.type(s) }
-  / s:'string' { return t.type(s) }
-  / u:union { return t.type(u) }
-
-union
-  = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
-      return [t.type(type)].concat(types.map(function(type) {
-        return t.type(type[3]);
-      }))
-    }
-
-// ===== annotation
-/*
-annotation
-  = '@' id:id '(' args:arguments ')' { return annotationWithArg(id, args) }
-  / '@' id:id '(' argument:argument ')' { return annotationWithArg(id, argument) }
-  / '@' id:id '(' space* ')' { return annotation(id) }
-  / '@' id:id { return annotation(id) }
-
-annotations
-  = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
-      return a[1]
-    }))}
-
-propertyOrAnnotation
-  = property
-  / annotation
-*/
-
-
-
-
-/*
-
-schema
-  = ws* typeSpec:typeSpec ws* { return typeSpec }
-  / ws* complexType:complexType ws* { return complexType }
-  / ws+ { return }
-
-id
-  = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
-
-property
-  = id:id typeSpec:(space+ typeSpec) {
-      return property(id, typeSpec[1])
-    }
-  / id:id annotations:(space+ annotations)? {
-      return property(id, typeSpec(undefined, annotations ? annotations[1] : []))
-    }
-  / id:id {
-      return property(id)
-    }
-
-complexType
-  = '{' ws* propertyOrAnnotation:propertyOrAnnotation properties:(space* lb+ ws* propertyOrAnnotation)* ws* '}' {
-      return complexType([propertyOrAnnotation].concat(properties.map(function(p) {
-        return p[3]
-      })))
-    }
-
-uniontype
-  = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
-      return [type].concat(types.map(function(t) {
-        return t[3];
-      }))
-    }
-
-type
-  = 'array'
-  / 'boolean'
-  / 'integer'
-  / 'number'
-  / 'null'
-  / 'object'
-  / 'string'
-  / uniontype
-
-typeSpec
-  = type:type annotations:(space+ annotations)? { return typeSpec(type, annotations ? annotations[1] : undefined )}
-
-string
-  = [a-zA-Z0-9_$-]+
-
-integer
-  = [-0-9]*
-
-boolean
-  = 'true'
-  / 'false'
-
-object
-  = '{}'
-
-array
-  = '[]'
-
-structure
-  = object
-  / array
-
-argument
-  = ['] argument:string ['] { return argument.join('')}
-  / ["] argument:string ["] { return argument.join('')}
-  / argument:structure { return JSON.parse(argument) }
-  / argument:typeSpec
-  / argument:annotation
-  / argument:boolean { return JSON.parse(argument) }
-  / argument:integer { return parseInt(argument.join('')) }
-
-arguments
-  = arguments:((argument ([,] space+))+ argument) { function trueArg(value){return value[0] !== ',' && literal[1] !== ' '};
-     var args = [];
-     arguments[0].forEach(function(a) {
-       if (Array.isArray(a)) {
-         a.forEach(function(v) {
-           if (trueArg(v)) {
-             args.push(v)
-           }
-         })
-       }
-     })
-     args.push(arguments[arguments.length-1]);
-     return args
- }
-
-annotation
-  = '@' id:id '(' args:arguments ')' { return annotationWithArg(id, args) }
-  / '@' id:id '(' argument:argument ')' { return annotationWithArg(id, argument) }
-  / '@' id:id '(' space* ')' { return annotation(id) }
-  / '@' id:id { return annotation(id) }
-
-annotations
-  = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
-      return a[1]
-    }))}
-
-propertyOrAnnotation
-  = property
-  / annotation
-
-
-*/

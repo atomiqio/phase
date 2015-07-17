@@ -208,6 +208,8 @@ describe('numbers', function () {
     test('1.2e3', 1.2e3);
     test('1.2E-3', 1.2E-3);
     test('-12.12E-1', -12.12E-1);
+    test('-12.12E-1234', -12.12E-1234);
+    test('-12.12E1234', -12.12E1234);
     test('-12.12E-1', {
       tag: 'number',
       type: 'number',
