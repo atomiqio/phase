@@ -1,0 +1,10 @@
+foo {
+  foo string @required @uppercase @length(3, 10)
+  bar number @format("integer")
+  person {
+    name string @required
+    age number
+  }
+  foobar string
+} @a @pattern('abc')
+

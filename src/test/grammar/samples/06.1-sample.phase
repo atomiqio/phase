@@ -1,0 +1,4 @@
+foo {
+  foo string
+  bar number @format("integer")
+}

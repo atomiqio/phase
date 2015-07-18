@@ -1,107 +1,200 @@
 {
-  function typeSpec(type, annotations) {
-    return {
-      tt: 'typeSpec',
-      type: type,
-      annotations: annotations || []
-    }
-  }
+  var t = require('./phase-parser-nodes');
 
-  function property(id, typeSpec) {
-    return {
-      tt: 'property',
-      name: id,
-      typeSpec: typeSpec
-    }
+  function p() {
+    console.log.apply(console, Array.prototype.slice.call(arguments));
   }
-
-  function complexType(properties) {
-    return {
-      tt: 'complexType',
-      properties: properties
-    }
-  }
-
-  function annotation(name) {
-    return {
-      tt: 'annotation',
-      name: name
-    }
-  }
-
 }
 
-start
- = schema
+start = schema
+
+sp = [ \t]
+lb = [\r\n]
+ws = ( sp / lb / comment ) { return '' }
+
+comment = slComment / mlComment
+slComment = '//' (!lb .)* { return '' }
+mlComment = '/*' (!'*/' .)* '*/' { return '' }
+
+sign = [+-]
+
+// ========================================================
+// Declarations
+// ========================================================
 
 schema
- = ws* typeSpec:typeSpec ws* { return typeSpec }
- / ws* complexType:complexType ws* { return complexType }
- / ws+ { return }
+  = ws* decl:anonymousDeclaration ws* { return t.schema(decl) }
+  / ws* decl:declaration ws* { return t.schema(decl) }
+  / literal
+  / ws* { return null }
 
-// ===== whitespace
+anonymousDeclaration
+  = at:annotatedType ws* [;]? { return t.anonymousDeclaration(at) }
 
-lb
- = [\r\n]
-
-space
- = [ \t]
-
-ws
- = space
- / lb
-
-id
- = first:[a-zA-Z_$] rest:[a-zA-Z0-9_$]* { return first + rest.join('') }
-
-property
- = id:id typeSpec:(space+ typeSpec) {
-     return property(id, typeSpec[1])
-   }
- / id:id annotations:(space+ annotations)? {
-     return property(id, typeSpec(undefined, annotations ? annotations[1] : []))
-   }
- / id:id {
-     return property(id)
-   }
-
-complexType
- = '{' ws* propertyOrAnnotation:propertyOrAnnotation properties:(space* lb+ ws* propertyOrAnnotation)* ws* '}' {
-     return complexType([propertyOrAnnotation].concat(properties.map(function(p) {
-       return p[3]
-     })))
-   }
-
-uniontype
- = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
-     return [type].concat(types.map(function(t) {
-       return t[3];
-     }))
-   }
+id = $([a-zA-Z_$] [a-zA-Z0-9_$]*)
 
 type
- = 'array'
- / 'boolean'
- / 'integer'
- / 'number'
- / 'null'
- / 'object'
- / 'string'
- / uniontype
+  = 'array' { return t.type(text()) }
+  / 'boolean' { return t.type(text()) }
+  / 'number' { return t.type(text()) }
+  / 'object' { return t.type(text()) }
+  / 'string' { return t.type(text()) }
+  / u:union { return t.type(u) }
 
-typeSpec
- = type:type annotations:(space+ annotations)? { return typeSpec(type, annotations ? annotations[1] : undefined )}
+union
+  = '[' ws* type:type types:(ws* ',' ws* type ws*)* ']' {
+      return [t.type(type)].concat(types.map(function(type) {
+        return t.type(type[3]);
+      }))
+    }
 
 annotation
- = '@' id:id { return annotation(id) }
+  = '@' name:id args:arguments? { return t.annotation(name, args) }
+
+argument
+  = literal
+
+arguments
+  = "(" ws* arg:argument args:(ws* ',' ws* argument)* ws* ")" {
+      return [arg].concat(args.map(function(e) { return e[3] }))
+    }
 
 annotations
- = annotation:annotation annotations:(ws+ annotation)* { return [annotation].concat(annotations.map(function(a) {
-     return a[1]
-   }))}
+  = ann:annotation annotations:(ws+ annotation)* {
+      return [ann].concat(annotations.map(function(e) { return e[1] }))
+    }
 
-propertyOrAnnotation
- = property
- / annotation
+annotatedType
+  = type:type list:(ws+ annotations)? {
+      return t.annotatedType(type, list ? list[1] : []);
+    }
+  / type:compoundType list:(ws+ annotations)? {
+      return t.annotatedType(type, list ? list[1] : []);
+    }
 
+declaration
+  = id:id ws+ type:annotatedType (!'}' ws)* ';'? { return t.declaration(id, type) }
+
+declarations
+  = decl:declaration list:(ws* declaration)* {
+      return [decl].concat(list.map(function(e) { return e[1] }))
+    }
+
+compoundType
+  = "{" ws* seq:declarations? ws* "}" { return t.compoundType(seq) }
+  / "{" ws* "}" { return t.compoundType() }
+
+// ========================================================
+// Literals
+// ========================================================
+
+literal
+  = booleanLiteral
+  / numberLiteral
+  / undefinedLiteral
+  / nullLiteral
+  / arrayLiteral
+  / objectLiteral
+  / stringLiteral
+
+list
+  = literal:literal literals:(ws* ',' ws* literal)* {
+      return [literal].concat(literals.map(function(v) { return v[3] }));
+    }
+
+// ===== undefined literal
+
+undefinedLiteral = 'undefined' { return t.undefinedLiteral() }
+
+// ===== null literal
+
+nullLiteral = 'null' { return t.nullLiteral() }
+
+// ===== boolean literal
+
+booleanLiteral
+  = 'true' { return t.booleanLiteral('true') }
+  / 'false' { return t.booleanLiteral('false') }
+
+// ===== string literal
+
+escapedBackSlash
+  = '\\' { return text() }
+
+charSequenceDquotes
+  = esc:escapedBackSlash cs:charSequenceDquotes* { return text() }
+  / char:[^"] cs:charSequenceDquotes* { return text() }
+
+charSequenceSquotes
+  = esc:escapedBackSlash cs:charSequenceSquotes* { return text() }
+  / char:[^'] cs:charSequenceSquotes* { return text() }
+
+stringLiteral
+  = "'" cs:charSequenceSquotes? "'" { return t.stringLiteral(cs || '') }
+  / '"' cs:charSequenceDquotes? '"' { return t.stringLiteral(cs || '') }
+
+// ===== object literal
+
+property
+  = key:stringLiteral ws* ':' ws* literal:literal { return [key.value, literal] }
+
+propertyList
+  = prop:property props:(ws* ',' ws* property)* {
+      return [prop].concat(props.map(function(p) { return p[3] }));
+    }
+
+objectLiteral
+  = '{' ws* props:propertyList? ws* '}' {
+      return t.objectLiteral(text(), props || []);
+    }
+
+// ===== array literal
+
+arrayLiteral
+  = str:('[' ws* list? ws* ']') {
+      var list = str[2] || [];
+      list = list.map(function(l) { return l.text; }).join(',');
+      return t.arrayLiteral('[' + list + ']', str[2]);
+    }
+
+// ===== number literal (integer and floating-point)
+
+numberLiteral
+  = float
+  / integer
+  / nan
+  / infinity
+
+digit
+  = [0-9]
+
+hexdigit
+  = [0-9a-fA-F]
+
+// [sign][0[(x|X)]](digits|hexdigit)
+integer
+  = sign:sign? '0' hex:[xX] hexdigits:hexdigit+ {
+      return t.numberLiteral((sign || '') + '0' + hex + hexdigits.join(''), "integer")
+    }
+  / sign:sign? '0' digits:digit+ {
+      return t.numberLiteral((sign || '') + '0' + digits.join(''), "integer")
+    }
+  / sign:sign? digits:digit+ {
+      return t.numberLiteral((sign || '') + digits.join(''), "integer")
+    }
+
+// [sign][digits].digits[(E|e)[(+|-)]digits]
+float
+  = sign:sign? int:digit* '.' mantissa:digit+ exp:([eE] sign? digit+)? {
+      return t.numberLiteral((sign || '') + (int ? int.join('') : '') + '.'
+        + mantissa.join('') + (exp ? exp[0] + (exp[1] || '') + exp[2].join('')  : ''), "float")
+    }
+
+nan
+  = 'NaN' { return t.numberLiteral("NaN", typeof(NaN)) }
+
+infinity
+  = sign:[+-]? 'Infinity' {
+      return t.numberLiteral((sign || '') + 'Infinity', typeof(Infinity))
+    }
 

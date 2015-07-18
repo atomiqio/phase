@@ -1,7 +1,7 @@
 import parser from './phase-parser';
 import { readFile, readFileSync } from 'fs';
 import ZSchema from 'z-schema';
-import { includes, find } from 'lodash';
+import { find } from 'lodash';
 
 /**
  * Factory for creating an official JSON Schema validator
@@ -58,11 +58,13 @@ export class Phase {
       throw err;
     }
 
-    // transform the phase schema to standard JSON schema
-    phase.schema = transform(phase.ast);
+    if (options && !options.no_transform) {
+      // transform the phase schema to standard JSON schema
+      phase.schema = transform(phase.ast);
 
-    // create a validator for the JSON schema
-    phase.validator = validatorFactory(phase.schema);
+      // create a validator for the JSON schema
+      phase.validator = validatorFactory(phase.schema);
+    }
 
     return phase;
   }
