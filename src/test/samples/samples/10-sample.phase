@@ -1,8 +1,8 @@
 {
-  foo string @required @uppercase @length(3, 10)
-  bar number @format("integer")
+  foo string @required @uppercase @length(3, 10);
   person {
     name string @required
     age number
-  }
+  };
+  bar number @format("integer");
 }

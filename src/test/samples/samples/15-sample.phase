@@ -1,0 +1,9 @@
+{
+  foo number
+
+  @pattern('abc')
+
+  bar string
+
+  @other
+}

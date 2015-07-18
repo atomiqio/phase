@@ -1,4 +1,4 @@
 foo {
-  foo string @required @uppercase @length(3, 10)
-  bar number @format("integer")
+  foo string @required @uppercase @length(3, 10);
+  bar number @format("integer");
 }

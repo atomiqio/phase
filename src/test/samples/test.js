@@ -49,7 +49,7 @@ describe('parse tests', function() {
 
     it ('should parse ' + result.file, function() {
       if (result.error) {
-        console.log(result.error);
+        console.log(result);
         throw new Error(result.error.message);
       }
 

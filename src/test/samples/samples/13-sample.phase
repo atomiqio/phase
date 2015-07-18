@@ -1,0 +1,6 @@
+{
+  @pattern('abc')
+  @other
+
+  foo number
+}

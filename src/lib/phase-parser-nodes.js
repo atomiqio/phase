@@ -1,5 +1,5 @@
 // ========================================================
-// Parsed literal values (primitives, objects, & arrays)
+// literals
 // ========================================================
 
 exports.undefinedLiteral = function() {
@@ -8,8 +8,8 @@ exports.undefinedLiteral = function() {
     type: typeof undefined,
     text: 'undefined',
     value: undefined
-  }
-}
+  };
+};
 
 exports.nullLiteral = function() {
   return {
@@ -17,8 +17,8 @@ exports.nullLiteral = function() {
     type: typeof null,
     text: 'null',
     value: null
-  }
-}
+  };
+};
 
 exports.booleanLiteral = function(text) {
   return {
@@ -27,7 +27,7 @@ exports.booleanLiteral = function(text) {
     text: text,
     value: text === 'true'
   };
-}
+};
 
 exports.stringLiteral = function(text) {
   return {
@@ -36,7 +36,7 @@ exports.stringLiteral = function(text) {
     text: text,
     value: text
   };
-}
+};
 
 exports.arrayLiteral = function(text, value) {
   return {
@@ -45,7 +45,7 @@ exports.arrayLiteral = function(text, value) {
     text: text,
     value: value
   };
-}
+};
 
 exports.objectLiteral = function(text, props) {
   var o = {};
@@ -59,7 +59,7 @@ exports.objectLiteral = function(text, props) {
     text: text,
     value: o
   };
-}
+};
 
 exports.numberLiteral = function(text, format) {
   var sign, value, error, num, base, input = text;
@@ -105,72 +105,81 @@ exports.numberLiteral = function(text, format) {
   if (error) num.error = error;
 
   return num;
-}
+};
 
 // ========================================================
-//
+// Declarations
 // ========================================================
+
+exports.id = function(value) {
+  return {
+    tag: 'id',
+    type: 'string',
+    value: value
+  };
+};
 
 exports.type = function(value) {
   if (Array.isArray(value)) {
     return {
       tag: 'union',
       type: 'union',
-      text: JSON.stringify(value),
       value: value
-    }
+    };
+  } else {
+    return {
+      tag: 'type',
+      type: value,
+      value: value
+    };
   }
+};
 
+exports.annotation = function(name, args) {
   return {
-    tag: 'type',
-    type: value,
-    text: value,
-    value: value
-  }
-}
+    tag: 'annotation',
+    name: name,
+    args: args
+  };
+};
 
-function typeSpec(type, annotations) {
+exports.annotatedType = function(type, annotations) {
   return {
-    tt: 'typeSpec',
+    tag: 'annotatedType',
     type: type,
     annotations: annotations || []
-  }
-}
+  };
+};
 
-function property(id, typeSpec) {
+exports.declaration = function(id, annotatedType) {
   return {
-    tt: 'property',
-    name: id,
-    typeSpec: typeSpec
-  }
-}
+    tag: 'declaration',
+    id: id,
+    annotatedType: annotatedType
+  };
+};
 
-function complexType(properties) {
+exports.block = function(declarations, annotations) {
   return {
-    tt: 'complexType',
-    properties: properties
-  }
-}
+    tag: 'block',
+    declarations: declarations,
+    annotations: annotations
+  };
+};
 
-function annotation(name) {
+exports.complexDeclaration = function(declarations, annotations) {
   return {
-    tt: 'annotation',
-    name: name
-  }
-}
+    tag: 'complexDeclaration',
+    declarations: declarations,
+    annotations: annotations
+  };
+};
 
-function annotationWithArg(name, value) {
+exports.schema = function(type, value) {
   return {
-    tt: 'annotation',
-    name: name,
+    tag: 'schema',
+    type: type,
     value: value
-  }
-}
-
-function dump(value) {
-  return {
-    value: value,
-    type: typeof value
-  }
-}
+  };
+};
 

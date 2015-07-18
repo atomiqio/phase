@@ -1,41 +1,39 @@
 {
-  var t = require('./phase-node-types');
+  var t = require('./phase-parser-nodes');
 
   function p() {
     console.log.apply(console, Array.prototype.slice.call(arguments));
   }
 }
 
-start
-  = schema
+start = schema
+
+sp = [ \t]
+lb = [\r\n]
+ws = sp / lb
+sign = [+-]
+
+// ========================================================
+// Declarations
+// ========================================================
 
 schema
-  = ws* type:annotatedType ws* [;]? { return type }
-  / ws* decl:declaration ws* { return decl }
-  / ws* complexDecl:complexDeclaration ws* { return complexDecl }
+  = ws* ad:anonymousDeclaration ws* { return t.schema('anonymousDeclaration', ad) }
+  / ws* decl:declaration ws* { return t.schema('declaration', decl) }
   / ws* { return null }
 
+anonymousDeclaration
+  = at:annotatedType ws* [;]? { return at }
+  / blockType
 
-space = [ \t]
-lb = [\r\n]
-ws = space / lb
-
-
-/*
-type
-  = "boolean"
-  / "number"
-  / "string"
-  / "array"
-*/
-
+id = id:$([a-zA-Z_$] [a-zA-Z0-9_$]*) { return t.id(text()) }
 
 type
-  = s:'array' { return t.type(s) }
-  / s:'boolean' { return t.type(s) }
-  / s:'number' { return t.type(s) }
-  / s:'object' { return t.type(s) }
-  / s:'string' { return t.type(s) }
+  = 'array' { return t.type(text()) }
+  / 'boolean' { return t.type(text()) }
+  / 'number' { return t.type(text()) }
+  / 'object' { return t.type(text()) }
+  / 'string' { return t.type(text()) }
   / u:union { return t.type(u) }
 
 union
@@ -45,9 +43,8 @@ union
       }))
     }
 
-
 annotation
-  = '@' ann:id args:arguments? { return { annotation:ann, arguments:args } }
+  = '@' ann:id args:arguments? { return t.annotation(ann, args) }
 
 argument
   = literal
@@ -57,28 +54,64 @@ arguments
       return [arg].concat(args.map(function(e) { return e[3] }))
     }
 
+annotations
+  = ann:annotation annotations:(sp+ annotation)* {
+      return [ann].concat(annotations.map(function(e) { return e[1] }))
+    }
+
+annotationSequence
+  = ann:annotation annotations:(ws+ annotation)* {
+      return [ann].concat(annotations.map(function(e) { return e[1] }))
+    }
+
 annotatedType
-  = type:type list:(ws+ annotation)* {
-      return { type: type, annotations: list.map(function(e) { return e[1] }) }
+  = type:type list:(sp+ annotations)? {
+      return t.annotatedType(type, list ? list[1] : []);
     }
 
 declaration
-  = id:id ws+ at:annotatedType space* [;\r\n] { return { id:id, type:at } }
-  / id:id ws+ at:annotatedType space* &'}' { return { id:id, type:at } }
-  / id:id ws+ decl:complexDeclaration { return { id:id, complexType:decl } }
+  = id:id sp+ at:annotatedType sp* lb { return t.declaration(id, at) }
+  / id:id sp+ at:annotatedType sp* &'}' { return t.declaration(id, at) }
+  / id:id sp+ at:annotatedType sp* ';' { return t.declaration(id, at) }
+  / id:id sp+ block:blockType sp* lb { return { id:id, complexType:block } }
+  / id:id sp+ block:blockType sp* ';' { return { id:id, complexType:block } }
 
-declarationList
+//  / id:id sp+ at:annotatedType sp* [;\r\n] { return t.declaration(id, at) }
+//  / id:id sp+ at:annotatedType ws* &'}' { return t.declaration(id, at) }
+  /// FIX:    id:id ws+ decl:complexDeclaration { return t.complexDeclaration(id, decl) }
+
+declarationSequence
   = decl:declaration list:(ws* declaration)* {
-      return [decl].concat(list.map(function(e) { return e[1] } ))
+      return [decl].concat(list.map(function(e) { return e[1] }))
     }
 
+declarationsAndAnnotationsSequence
+  = as:annotationSequence ws+ seq:declarationsAndAnnotationsSequence? {
+      seq = seq || { declarations:[], annotations:[] };
+      return {
+        declarations: seq.declarations,
+        annotations: as.concat(seq.annotations)
+      }
+    }
+  / ds:declarationSequence ws+ seq:declarationsAndAnnotationsSequence? {
+      seq = seq || { declarations:[], annotations:[] };
+      return {
+        declarations: ds.concat(seq.declarations),
+        annotations: seq.annotations
+      }
+    }
 
-id = [a-zA-Z_$] [a-zA-Z0-9_$]* { /* TODO return node */ return text() }
+blockType
+  = "{" ws* seq:declarationsAndAnnotationsSequence? ws* "}" {
+      seq = seq || {}
+      // FIX
+      return { tag:'complexDeclaration', declarations:seq.declarations, annotations:seq.annotations } || {}
+    }
+  / "{" ws* "}"
 
-complexDeclaration
-  = "{" ws* decl:declarationList? ws* "}" { return decl || {} }
-
-// ================================================================================
+// ========================================================
+// Literals
+// ========================================================
 
 literal
   = booleanLiteral
@@ -88,17 +121,6 @@ literal
   / arrayLiteral
   / objectLiteral
   / stringLiteral
-
-// ===== whitespace
-
-space = [ \t]
-lb = [\r\n]
-ws = space / lb
-
-// ===== Common Productions
-
-sign = [+-]
-
 
 list
   = literal:literal literals:(ws* ',' ws* literal)* {
