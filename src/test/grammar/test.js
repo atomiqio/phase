@@ -7,7 +7,7 @@ import { isEqual } from '../helpers';
 const samplesDir = join(__dirname, './samples');
 
 const options = {
-  no_transform: true
+  //no_transform: true
 };
 
 // only want the ast for testing

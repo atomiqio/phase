@@ -121,7 +121,7 @@ function* load(dir, ext) {
       const jsonSchemaFile = readdirSync(schemaPath).filter(f => f == 'schema.json')[0];
       let jsonSchema;
       if (jsonSchemaFile) {
-	jsonSchema = JSON.parse(readFileSync(join(schemaPath, jsonSchemaFile), 'utf8'));
+	    jsonSchema = JSON.parse(readFileSync(join(schemaPath, jsonSchemaFile), 'utf8'));
       }
 
       // restore spaces to get actual description from test suite
@@ -135,7 +135,7 @@ function* load(dir, ext) {
 
       yield {
         schema: schema,
-	jsonSchema: jsonSchema,
+        jsonSchema: jsonSchema,
         description: description,
         filename: schemaFile,
         filepath: schemaFilePath,

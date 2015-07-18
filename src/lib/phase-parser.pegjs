@@ -37,6 +37,8 @@ type
   = 'array' { return t.type(text()) }
   / 'boolean' { return t.type(text()) }
   / 'number' { return t.type(text()) }
+  / 'integer' { return t.type(text()) }
+  / 'null' { return t.type(text()) }
   / 'object' { return t.type(text()) }
   / 'string' { return t.type(text()) }
   / u:union { return t.type(u) }
@@ -53,6 +55,7 @@ annotation
 
 argument
   = literal
+  / type
 
 arguments
   = "(" ws* arg:argument args:(ws* ',' ws* argument)* ws* ")" {
@@ -73,7 +76,7 @@ annotatedType
     }
 
 declaration
-  = id:id ws+ type:annotatedType (!'}' ws)* ';'? { return t.declaration(id, type) }
+  = id:id ws+ type:annotatedType? (!'}' ws)* ';'? { return t.declaration(id, type) }
 
 declarations
   = decl:declaration list:(ws* declaration)* {
@@ -82,6 +85,7 @@ declarations
 
 compoundType
   = "{" ws* seq:declarations? ws* "}" { return t.compoundType(seq) }
+  / "{" ws* seq:annotations? ws* "}" { return t.compoundType(seq) }
   / "{" ws* "}" { return t.compoundType() }
 
 // ========================================================

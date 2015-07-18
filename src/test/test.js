@@ -1,5 +1,5 @@
 describe('core parser tests', function() {
-  describe('literal tests', function() {
+  describe.skip('literal tests', function() {
     require('./literals/test');
   });
 
@@ -8,7 +8,7 @@ describe('core parser tests', function() {
   });
 });
 
-describe('schema parser tests', function() {
-  //require('./schema/test');
+describe.only('schema parser tests', function() {
+  require('./schema/test');
 });
 
