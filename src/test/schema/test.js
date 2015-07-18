@@ -17,7 +17,7 @@ const prn = console.log;
 // by json-schema-test-suite. The loadSamples function in this module relies on this
 // directory structure. The tests will load a schema.phase file, if present, to compare
 // against the reference schema.json file.
-const testSuitePath = join(__dirname, './testsuite');
+//const testSuitePath = join(__dirname, './testsuite');
 
 // factory function for creating a tv4 JSON Schema validator
 const tv4SchemaFactory = (schema, options) => {
@@ -101,7 +101,7 @@ const validators = [
  * @return {object} yields a schema sample
  */
 function* loadSamples(ext) {
-  const testsuitePath = join(__dirname, 'testsuite');
+  const testSuitePath = join(__dirname, 'testsuite');
   for (const sample of testSuite.load(testSuitePath, ext)) {
     yield sample;
   }
@@ -110,7 +110,7 @@ function* loadSamples(ext) {
 
 // TESTS
 
-describe.skip('validator tests', function () {
+describe('validator tests', function () {
 
   for (let { name, factory, ext, skip } of validators) {
     if (skip) continue;

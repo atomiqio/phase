@@ -108,7 +108,7 @@ exports.arrayLiteral = function(text, value) {
     tag: 'array',
     type: 'object',
     text: text,
-    value: value
+    value: value || []
   };
 };
 

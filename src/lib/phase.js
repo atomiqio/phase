@@ -52,8 +52,8 @@ export class Phase {
       phase.ast = parser.parse(phase.raw);
     } catch (err) {
       if (err.name == 'SyntaxError' && phase.filename) {
-	err.filename = phase.filename;
-	err.filepath = phase.filepath;
+	    err.filename = phase.filename;
+	    err.filepath = phase.filepath;
       }
       throw err;
     }
@@ -126,44 +126,123 @@ export class Phase {
  * @param ast abstract syntax tree
  */
 function transform(ast) {
-  return generators[ast.tt](ast);
+  if (ast && ast.declaration) return generators[ast.declaration.tag](ast.declaration);
+  return console.log('NO AST FOUND');
 }
 
 /**
- * Map AST types to generator functions
+ * Map AST declarations to generator functions
  */
 const generators = {
 
-  typeSpec: generateFromTypeSpec,
-  complexType: generateFromComplexType
+  declaration: generateFromDeclaration,
+  anonymousDeclaration: generateFromAnonymousDeclaration
 
+};
+
+function generateFromDeclaration(ast) {
 }
 
-function generateFromTypeSpec(ast) {
-  return {
-    type: ast.type
+function generateFromAnonymousDeclaration(decl) {
+  let schema = annotatedTypes[decl.annotatedType.type.tag](decl);
+
+  if (decl.annotatedType.annotations.length) {
+    decl.annotatedType.annotations.forEach(a => {
+      schema[a.name] = getAnnotationValue(a.args);
+    });
+      //// TODO required will be a built in annotation, but still shouldn't be hard-coded like this
+      //let req = find(p.typeSpec.annotations, { name: 'required' });
+      //if (req) {
+      //    if (!schema.required) schema.required = [];
+      //    schema.required.push(p.name);
+      //}
   }
-}
-
-function generateFromComplexType(ast) {
-  let schema = {};
-
-  ast.properties.forEach(p => {
-    if (!schema.properties) schema.properties = {};
-
-    schema.properties[p.name] = p.typeSpec && p.typeSpec.type ? { type: p.typeSpec.type } : {};
-
-    if (p.typeSpec && p.typeSpec.annotations) {
-      // TODO required will be a built in annotation, but still shouldn't be hard-coded like this
-      let req = find(p.typeSpec.annotations, { name: 'required' });
-      if (req) {
-       if (!schema.required) schema.required = [];
-       schema.required.push(p.name);
-      }
-    }
-
-  });
 
   return schema;
 }
 
+/**
+ * Map declaration annotatedTypes to type functions
+ */
+const annotatedTypes = {
+  type: generateFromType,
+  union: generateFromUnion,
+  compoundType: generateFromCompoundType
+};
+
+function generateFromType(decl) {
+  let obj = {};
+
+  obj.type = decl.annotatedType.type.value;
+
+  return obj;
+}
+
+function generateFromUnion(decl) {
+  let obj = {
+    type: []
+  };
+
+  decl.annotatedType.type.value.forEach(v => {
+    if (v.tag === 'type') {
+      obj.type.push(v.value.value);
+    }
+  });
+
+  return obj;
+}
+
+function generateFromCompoundType(decl) {
+  let obj = {};
+  if (decl.annotatedType.type.declarations.length) {
+    obj.properties = {};
+    decl.annotatedType.type.declarations.forEach(d => {
+      if (d.tag === 'annotation') {
+        obj[d.name] = getAnnotationValue(d.args);
+      }
+
+      if (d.tag === 'declaration') {
+        obj.properties[d.name] = {};
+        if (d.annotatedType) {
+          obj.properties[d.name] = annotatedTypes[d.annotatedType.type.tag](d);
+          if (d.annotatedType.annotations.length) {
+            d.annotatedType.annotations.forEach(a => {
+              obj.properties[d.name][a.name] = getAnnotationValue(a.args);
+            })
+          }
+        }
+      }
+    })
+
+    if (!Object.keys(obj.properties).length) {
+      delete obj.properties;
+    }
+  }
+
+  return obj;
+}
+
+function getAnnotationValue(args) {
+  // if no arguments supplied, set default value to true
+  let result = true;
+
+  if (args.length) {
+    result = [];
+    args.forEach(arg => {
+      if (arg.tag === 'type') {
+        result.push({ type: arg.value })
+      } else {
+        result.push(arg.value);
+      }
+    });
+
+    if (args.length < 2) {
+      result = args[0].value;
+      if (args[0].tag === 'type') {
+        result = { type: args[0].value }
+      }
+    }
+  }
+
+  return result;
+}
