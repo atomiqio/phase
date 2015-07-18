@@ -1,4 +1,69 @@
 // ========================================================
+// Declarations
+// ========================================================
+
+exports.type = function(value) {
+  if (Array.isArray(value)) {
+    return {
+      tag: 'union',
+      type: 'union',
+      value: value
+    };
+  } else {
+    return {
+      tag: 'type',
+      type: value,
+      value: value
+    };
+  }
+};
+
+exports.annotation = function(name, args) {
+  return {
+    tag: 'annotation',
+    name: name,
+    args: args || []
+  };
+};
+
+exports.annotatedType = function(type, annotations) {
+  return {
+    tag: 'annotatedType',
+    type: type,
+    annotations: annotations || []
+  };
+};
+
+exports.anonymousDeclaration = function(annotatedType) {
+  return {
+    tag: 'anonymousDeclaration',
+    annotatedType: annotatedType
+  };
+};
+
+exports.declaration = function(name, annotatedType) {
+  return {
+    tag: 'declaration',
+    name: name,
+    annotatedType: annotatedType
+  };
+};
+
+exports.compoundType = function(declarations) {
+  return {
+    tag: 'compoundType',
+    declarations: declarations || []
+  };
+};
+
+exports.schema = function(decl) {
+  return {
+    tag: 'schema',
+    declaration: decl
+  };
+};
+
+// ========================================================
 // literals
 // ========================================================
 
@@ -105,81 +170,5 @@ exports.numberLiteral = function(text, format) {
   if (error) num.error = error;
 
   return num;
-};
-
-// ========================================================
-// Declarations
-// ========================================================
-
-exports.id = function(value) {
-  return {
-    tag: 'id',
-    type: 'string',
-    value: value
-  };
-};
-
-exports.type = function(value) {
-  if (Array.isArray(value)) {
-    return {
-      tag: 'union',
-      type: 'union',
-      value: value
-    };
-  } else {
-    return {
-      tag: 'type',
-      type: value,
-      value: value
-    };
-  }
-};
-
-exports.annotation = function(name, args) {
-  return {
-    tag: 'annotation',
-    name: name,
-    args: args
-  };
-};
-
-exports.annotatedType = function(type, annotations) {
-  return {
-    tag: 'annotatedType',
-    type: type,
-    annotations: annotations || []
-  };
-};
-
-exports.declaration = function(id, annotatedType) {
-  return {
-    tag: 'declaration',
-    id: id,
-    annotatedType: annotatedType
-  };
-};
-
-exports.block = function(declarations, annotations) {
-  return {
-    tag: 'block',
-    declarations: declarations,
-    annotations: annotations
-  };
-};
-
-exports.complexDeclaration = function(declarations, annotations) {
-  return {
-    tag: 'complexDeclaration',
-    declarations: declarations,
-    annotations: annotations
-  };
-};
-
-exports.schema = function(type, value) {
-  return {
-    tag: 'schema',
-    type: type,
-    value: value
-  };
 };
 

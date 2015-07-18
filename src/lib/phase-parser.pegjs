@@ -23,14 +23,14 @@ sign = [+-]
 // ========================================================
 
 schema
-  = ws* ad:anonymousDeclaration ws* { return t.schema('anonymousDeclaration', ad) }
-  / ws* decl:declaration ws* { return t.schema('declaration', decl) }
+  = ws* decl:anonymousDeclaration ws* { return t.schema(decl) }
+  / ws* decl:declaration ws* { return t.schema(decl) }
   / ws* { return null }
 
 anonymousDeclaration
-  = at:annotatedType ws* [;]? { return at }
+  = at:annotatedType ws* [;]? { return t.anonymousDeclaration(at) }
 
-id = id:$([a-zA-Z_$] [a-zA-Z0-9_$]*) { return t.id(text()) }
+id = $([a-zA-Z_$] [a-zA-Z0-9_$]*)
 
 type
   = 'array' { return t.type(text()) }
@@ -48,7 +48,7 @@ union
     }
 
 annotation
-  = '@' ann:id args:arguments? { return t.annotation(ann, args) }
+  = '@' name:id args:arguments? { return t.annotation(name, args) }
 
 argument
   = literal
@@ -72,12 +72,7 @@ annotatedType
     }
 
 declaration
-  = id:id sp+ at:annotatedType sp* lb { return t.declaration(id, at) }
-  / id:id sp+ at:annotatedType sp* &'}' { return t.declaration(id, at) }
-  / id:id sp+ at:annotatedType sp* ';' { return t.declaration(id, at) }
-  // TODO - the following two rules need to return nodes
-  / id:id sp+ block:compoundType sp* lb { return { id:id, compoundType:block } }
-  / id:id sp+ block:compoundType sp* ';' { return { id:id, compoundType:block } }
+  = id:id ws+ type:annotatedType (!'}' ws)* ';'? { return t.declaration(id, type) }
 
 declarations
   = decl:declaration list:(ws* declaration)* {
@@ -85,11 +80,8 @@ declarations
     }
 
 compoundType
-  = "{" ws* seq:declarations? ws* "}" {
-      // FIX
-      return { tag:'compoundType', declarations:seq }
-    }
-  / "{" ws* "}"
+  = "{" ws* seq:declarations? ws* "}" { return t.compoundType(seq) }
+  / "{" ws* "}" { return t.compoundType() }
 
 // ========================================================
 // Literals
@@ -126,31 +118,19 @@ booleanLiteral
 // ===== string literal
 
 escapedBackSlash
-  = '\\' { p('escapedBackSlash: \\'); return text() }
+  = '\\' { return text() }
 
 charSequenceDquotes
-  = esc:escapedBackSlash cs:charSequenceDquotes* {
-      p('charSequence: escapedBackSlash charSequenceDquotes* => ', esc, cs.join(''))
-      return text()
-    }
-  / char:[^"] cs:charSequenceDquotes* {
-      p('charSequence: [^"] charSequenceDquotes* => ', char, cs.join(''))
-      return text()
-    }
+  = esc:escapedBackSlash cs:charSequenceDquotes* { return text() }
+  / char:[^"] cs:charSequenceDquotes* { return text() }
 
 charSequenceSquotes
-  = esc:escapedBackSlash cs:charSequenceSquotes* {
-      p('charSequence: escapedBackSlash charSequenceSquotes* => ', esc, cs.join(''))
-      return text()
-    }
-  / char:[^'] cs:charSequenceSquotes* {
-      p('charSequence: [^\'] charSequenceSquotes* => ', char, cs.join(''))
-      return text()
-    }
+  = esc:escapedBackSlash cs:charSequenceSquotes* { return text() }
+  / char:[^'] cs:charSequenceSquotes* { return text() }
 
 stringLiteral
-  = "'" cs:charSequenceSquotes? "'" { p('stringLiteral:squote => %s', cs); return t.stringLiteral(cs || '') }
-  / '"' cs:charSequenceDquotes? '"' { p('stringLiteral:dquote => %s', cs); return t.stringLiteral(cs || '') }
+  = "'" cs:charSequenceSquotes? "'" { return t.stringLiteral(cs || '') }
+  / '"' cs:charSequenceDquotes? '"' { return t.stringLiteral(cs || '') }
 
 // ===== object literal
 

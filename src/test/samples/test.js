@@ -48,13 +48,19 @@ describe('parse tests', function() {
   for (const result of load()) {
 
     it ('should parse ' + result.file, function() {
-      if (result.error) {
-        console.log(result);
-        throw new Error(result.error.message);
-      }
+      console.log('=========================');
+      console.log(result.text);
+      console.log('-------------------------');
 
-      console.log('\n=========================');
-      console.log(JSON.stringify(result, null, 2));
+      if (result.error) {
+        console.log(JSON.stringify(result, null, 2));
+        throw new Error(result.error.message);
+      } else {
+        console.log(JSON.stringify({
+          file: result.file,
+          ast: result.ast
+        }, null, 2));
+      }
 
     })
 
