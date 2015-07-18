@@ -251,26 +251,3 @@ describe('array literals', function () {
 
 });
 
-describe('type keywords', function() {
-
-  test('boolean', 'boolean');
-  test('number', 'number');
-  test('string', 'string');
-  test('object', 'object');
-  test('array', 'array');
-
-  // union type
-  test('[ boolean, number, string, object, array ]', [
-    { tag: 'type', 'type': 'boolean', text: 'boolean', value: 'boolean' },
-    { tag: 'type', 'type': 'number', text: 'number', value: 'number' },
-    { tag: 'type', 'type': 'string', text: 'string', value: 'string' },
-    { tag: 'type', 'type': 'object', text: 'object', value: 'object' },
-    { tag: 'type', 'type': 'array', text: 'array', value: 'array' }
-  ]);
-
-});
-
-describe('annotations', function() {
-
-});
-

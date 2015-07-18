@@ -43,27 +43,24 @@ function* load() {
   }
 }
 
-describe('parse tests', function() {
+for (const result of load()) {
 
-  for (const result of load()) {
+  it ('should parse ' + result.file, function() {
+    console.log('\n\n=========================');
+    console.log('%s:', result.file);
+    console.log(result.text);
+    console.log('-------------------------');
 
-    it ('should parse ' + result.file, function() {
-      console.log('=========================');
-      console.log(result.text);
-      console.log('-------------------------');
+    if (result.error) {
+      console.log(JSON.stringify(result, null, 2));
+      throw new Error(result.error.message);
+    } else {
+      console.log(JSON.stringify({
+        ast: result.ast
+      }, null, 2));
+    }
 
-      if (result.error) {
-        console.log(JSON.stringify(result, null, 2));
-        throw new Error(result.error.message);
-      } else {
-        console.log(JSON.stringify({
-          file: result.file,
-          ast: result.ast
-        }, null, 2));
-      }
+  })
 
-    })
+}
 
-  }
-
-})

@@ -1,9 +1,11 @@
 describe('core parser tests', function() {
-  require('./samples/test');
-})
+  describe('literal tests', function() {
+    require('./literals/test');
+  });
 
-describe('core parser tests', function() {
-  //require('./core/test');
+  describe('grammar tests', function() {
+    require('./grammar/test');
+  });
 });
 
 describe('schema parser tests', function() {

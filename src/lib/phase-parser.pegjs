@@ -25,6 +25,7 @@ sign = [+-]
 schema
   = ws* decl:anonymousDeclaration ws* { return t.schema(decl) }
   / ws* decl:declaration ws* { return t.schema(decl) }
+  / literal
   / ws* { return null }
 
 anonymousDeclaration
