@@ -52,8 +52,8 @@ export class Phase {
       phase.ast = parser.parse(phase.raw);
     } catch (err) {
       if (err.name == 'SyntaxError' && phase.filename) {
-	    err.filename = phase.filename;
-	    err.filepath = phase.filepath;
+	      err.filename = phase.filename;
+	      err.filepath = phase.filepath;
       }
       throw err;
     }
@@ -102,7 +102,7 @@ export class Phase {
       if (err) return callback(err);
 
       try {
-	callback(null, Phase.parse(text, options));
+	      callback(null, Phase.parse(text, options));
       } catch (err) {
         callback(err);
       }
@@ -127,7 +127,6 @@ export class Phase {
  */
 function transform(ast) {
   if (ast && ast.declaration) return generators[ast.declaration.tag](ast.declaration);
-  return console.log('NO AST FOUND');
 }
 
 /**
@@ -144,7 +143,7 @@ function generateFromDeclaration(ast) {
 }
 
 function generateFromAnonymousDeclaration(decl) {
-  let schema = annotatedTypes[decl.annotatedType.type.tag](decl);
+  let schema = annotatedTypes[decl.annotatedType.type.tag](decl.annotatedType.type);
 
   if (decl.annotatedType.annotations.length) {
     decl.annotatedType.annotations.forEach(a => {
@@ -170,20 +169,20 @@ const annotatedTypes = {
   compoundType: generateFromCompoundType
 };
 
-function generateFromType(decl) {
+function generateFromType(type) {
   let obj = {};
 
-  obj.type = decl.annotatedType.type.value;
+  obj.type = type.value;
 
   return obj;
 }
 
-function generateFromUnion(decl) {
+function generateFromUnion(type) {
   let obj = {
     type: []
   };
 
-  decl.annotatedType.type.value.forEach(v => {
+  type.value.forEach(v => {
     if (v.tag === 'type') {
       obj.type.push(v.value.value);
     }
@@ -192,11 +191,11 @@ function generateFromUnion(decl) {
   return obj;
 }
 
-function generateFromCompoundType(decl) {
+function generateFromCompoundType(type) {
   let obj = {};
-  if (decl.annotatedType.type.declarations.length) {
+  if (type.declarations.length) {
     obj.properties = {};
-    decl.annotatedType.type.declarations.forEach(d => {
+    type.declarations.forEach(d => {
       if (d.tag === 'annotation') {
         obj[d.name] = getAnnotationValue(d.args);
       }
@@ -204,7 +203,7 @@ function generateFromCompoundType(decl) {
       if (d.tag === 'declaration') {
         obj.properties[d.name] = {};
         if (d.annotatedType) {
-          obj.properties[d.name] = annotatedTypes[d.annotatedType.type.tag](d);
+          obj.properties[d.name] = annotatedTypes[d.annotatedType.type.tag](d.annotatedType.type);
           if (d.annotatedType.annotations.length) {
             d.annotatedType.annotations.forEach(a => {
               obj.properties[d.name][a.name] = getAnnotationValue(a.args);
@@ -228,20 +227,19 @@ function getAnnotationValue(args) {
 
   if (args.length) {
     result = [];
+
     args.forEach(arg => {
-      if (arg.tag === 'type') {
-        result.push({ type: arg.value })
+      if (arg.tag === 'type' || arg.tag === 'compoundType' || arg.tag === 'union') {
+        result.push(annotatedTypes[arg.tag](arg));
       } else {
         result.push(arg.value);
       }
     });
 
-    if (args.length < 2) {
-      result = args[0].value;
-      if (args[0].tag === 'type') {
-        result = { type: args[0].value }
-      }
+    if (result.length < 2) {
+      result = result[0];
     }
+
   }
 
   return result;
