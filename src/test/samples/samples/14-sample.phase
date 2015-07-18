@@ -1,6 +1,0 @@
-{
-  foo number
-
-  @pattern('abc')
-  @other
-}

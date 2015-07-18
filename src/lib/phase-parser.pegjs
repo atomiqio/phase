@@ -10,7 +10,12 @@ start = schema
 
 sp = [ \t]
 lb = [\r\n]
-ws = sp / lb
+ws = ( sp / lb / comment ) { return '' }
+
+comment = slComment / mlComment
+slComment = '//' (!lb .)* { return '' }
+mlComment = '/*' (!'*/' .)* '*/' { return '' }
+
 sign = [+-]
 
 // ========================================================
@@ -24,7 +29,6 @@ schema
 
 anonymousDeclaration
   = at:annotatedType ws* [;]? { return at }
-  / blockType
 
 id = id:$([a-zA-Z_$] [a-zA-Z0-9_$]*) { return t.id(text()) }
 
@@ -55,17 +59,15 @@ arguments
     }
 
 annotations
-  = ann:annotation annotations:(sp+ annotation)* {
-      return [ann].concat(annotations.map(function(e) { return e[1] }))
-    }
-
-annotationSequence
   = ann:annotation annotations:(ws+ annotation)* {
       return [ann].concat(annotations.map(function(e) { return e[1] }))
     }
 
 annotatedType
-  = type:type list:(sp+ annotations)? {
+  = type:type list:(ws+ annotations)? {
+      return t.annotatedType(type, list ? list[1] : []);
+    }
+  / type:compoundType list:(ws+ annotations)? {
       return t.annotatedType(type, list ? list[1] : []);
     }
 
@@ -73,39 +75,19 @@ declaration
   = id:id sp+ at:annotatedType sp* lb { return t.declaration(id, at) }
   / id:id sp+ at:annotatedType sp* &'}' { return t.declaration(id, at) }
   / id:id sp+ at:annotatedType sp* ';' { return t.declaration(id, at) }
-  / id:id sp+ block:blockType sp* lb { return { id:id, complexType:block } }
-  / id:id sp+ block:blockType sp* ';' { return { id:id, complexType:block } }
+  // TODO - the following two rules need to return nodes
+  / id:id sp+ block:compoundType sp* lb { return { id:id, compoundType:block } }
+  / id:id sp+ block:compoundType sp* ';' { return { id:id, compoundType:block } }
 
-//  / id:id sp+ at:annotatedType sp* [;\r\n] { return t.declaration(id, at) }
-//  / id:id sp+ at:annotatedType ws* &'}' { return t.declaration(id, at) }
-  /// FIX:    id:id ws+ decl:complexDeclaration { return t.complexDeclaration(id, decl) }
-
-declarationSequence
+declarations
   = decl:declaration list:(ws* declaration)* {
       return [decl].concat(list.map(function(e) { return e[1] }))
     }
 
-declarationsAndAnnotationsSequence
-  = as:annotationSequence ws+ seq:declarationsAndAnnotationsSequence? {
-      seq = seq || { declarations:[], annotations:[] };
-      return {
-        declarations: seq.declarations,
-        annotations: as.concat(seq.annotations)
-      }
-    }
-  / ds:declarationSequence ws+ seq:declarationsAndAnnotationsSequence? {
-      seq = seq || { declarations:[], annotations:[] };
-      return {
-        declarations: ds.concat(seq.declarations),
-        annotations: seq.annotations
-      }
-    }
-
-blockType
-  = "{" ws* seq:declarationsAndAnnotationsSequence? ws* "}" {
-      seq = seq || {}
+compoundType
+  = "{" ws* seq:declarations? ws* "}" {
       // FIX
-      return { tag:'complexDeclaration', declarations:seq.declarations, annotations:seq.annotations } || {}
+      return { tag:'compoundType', declarations:seq }
     }
   / "{" ws* "}"
 
