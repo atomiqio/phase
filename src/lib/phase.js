@@ -170,11 +170,7 @@ const annotatedTypes = {
 };
 
 function generateFromType(type) {
-  let obj = {};
-
-  obj.type = type.value;
-
-  return obj;
+  return { type: type.value };
 }
 
 function generateFromUnion(type) {
