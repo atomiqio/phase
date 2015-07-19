@@ -28,8 +28,9 @@ var paths = {
   src: ['src/**/*.js'],
   watch: ['src/**/*.js', 'src/**/*.json'],
   dist: 'dist',
-  test: 'dist/test/**/*.js',
-  peg: ['src/**/*.pegjs']
+  peg: ['src/**/*.pegjs'],
+//  test: 'dist/test/**/*.js'
+  test: 'dist/test/test.js'
 }
 
 gulp.task('default', ['test', 'watch']);

@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/atomiq/phase#readme",
   "dependencies": {
-    "@atomiq/promisify": "0.0.4",
     "babel-runtime": "^5.4.7",
     "lodash": "^3.10.0",
     "pegjs": "^0.8.0",
