@@ -173,12 +173,12 @@ function generateFromType(type) {
   return { type: type.value };
 }
 
-function generateFromUnion(type) {
+function generateFromUnion(union) {
   let obj = {
     type: []
   };
 
-  type.value.forEach(v => {
+  union.value.forEach(v => {
     if (v.tag === 'type') {
       obj.type.push(v.value.value);
     }
@@ -189,8 +189,10 @@ function generateFromUnion(type) {
 
 function generateFromCompoundType(type) {
   let obj = {};
+
   if (type.declarations.length) {
     obj.properties = {};
+
     type.declarations.forEach(d => {
       if (d.tag === 'annotation') {
         obj[d.name] = getAnnotationValue(d.args);
@@ -198,16 +200,18 @@ function generateFromCompoundType(type) {
 
       if (d.tag === 'declaration') {
         obj.properties[d.name] = {};
+
         if (d.annotatedType) {
           obj.properties[d.name] = annotatedTypes[d.annotatedType.type.tag](d.annotatedType.type);
+
           if (d.annotatedType.annotations.length) {
             d.annotatedType.annotations.forEach(a => {
               obj.properties[d.name][a.name] = getAnnotationValue(a.args);
-            })
+            });
           }
         }
       }
-    })
+    });
 
     if (!Object.keys(obj.properties).length) {
       delete obj.properties;
@@ -225,17 +229,12 @@ function getAnnotationValue(args) {
     result = [];
 
     args.forEach(arg => {
-      if (arg.tag === 'type' || arg.tag === 'compoundType' || arg.tag === 'union') {
-        result.push(annotatedTypes[arg.tag](arg));
-      } else {
-        result.push(arg.value);
-      }
+      annotatedTypes[arg.tag] ? result.push(annotatedTypes[arg.tag](arg)) : result.push(arg.value);
     });
 
     if (result.length < 2) {
       result = result[0];
     }
-
   }
 
   return result;
