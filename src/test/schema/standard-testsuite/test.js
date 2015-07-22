@@ -2,9 +2,9 @@ import assert from 'assert';
 import { join, dirname } from 'path';
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { format, inherits } from 'util';
-import { isEqual } from '../helpers';
+import { isEqual } from '../../helpers';
 import { draft4 } from 'json-schema-test-suite';
-import { Phase } from '../../lib/phase';
+import { Phase } from '../../../lib/phase';
 import tv4 from 'tv4';
 import ZSchema from 'z-schema';
 import testSuite from './testsuite';
@@ -240,7 +240,7 @@ function validate(validator, sample, test) {
  */
 function VerificationError(validator, sample) {
   this.name = 'VerificationError';
-  this.message = dump('generated schema does not match original', validator, sample);
+  this.message = dumpStr('generated schema does not match original', validator, sample);
 }
 
 inherits(VerificationError, Error);
