@@ -29,24 +29,27 @@ function sample(description, schema) {
   };
 }
 
-function test(phase, test) {
+function test(phase, sample, test) {
   let errMsg;
 
   try {
     const result = phase.validate(test.data);
-    errMsg = dump(phase, test, result);
+    errMsg = dump(phase, sample, test, result);
     assert(result.valid, test.valid, errMsg);
   } catch (err) {
     console.log('\n================================');
     console.log('Error: %s', err.message);
-    dump(phase, test);
+    dump(phase, sample, test);
     console.log('\n---------------------------------');
     throw err;
   }
 }
 
-function dump(phase, test, result) {
+function dump(phase, sample, test, result) {
   console.log('================================');
+  console.log('sample:');
+  console.log(sample);
+  console.log('---------------------------------');
   console.log('parser:');
   console.log(phase);
   console.log('---------------------------------');
@@ -65,7 +68,7 @@ samples().forEach(sample => {
     const phase = parse(sample.schema);
     sample.tests && sample.tests.forEach(t => {
       it(t.description, function () {
-        test(phase, t);
+        test(phase, sample, t);
       });
     });
   });
