@@ -13,7 +13,7 @@ describe('schema parser tests', function() {
     require('./schema/core/test');
   });
 
-  describe.skip('standard schema test suite', function() {
+  describe('standard schema test suite', function() {
     require('./schema/standard-testsuite/test');
   });
 });

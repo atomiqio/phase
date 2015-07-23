@@ -70,12 +70,20 @@ const test = function (descr, input, expected) {
 
 describe('null and undefined literals', function () {
 
+  // TODO: null is tricky!
+  // it can be both a type specifier in json schema
+  // as well as a literal when used in an argument list.
+  // We want to test as a literal, but we're not ready
+  // yet to test more advanced syntax like an
+  // annotation with arguments
+  /*
   test('null', {
     tag: 'null',
     type: 'object',
     text: 'null',
     value: null
   });
+  */
 
   test('undefined', {
     tag: 'undefined',
