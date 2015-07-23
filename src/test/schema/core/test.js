@@ -4,6 +4,9 @@ import { readdirSync, readFileSync } from 'fs';
 import { Phase } from '../../../lib/phase';
 import { isEqual } from '../../helpers';
 import assert from 'assert';
+import chalk from 'chalk';
+
+const error = chalk.red;
 
 const options = {
   //no_transform: true
@@ -37,24 +40,32 @@ function test(phase, sample, test) {
     errMsg = dump(phase, sample, test, result);
     assert(result.valid, test.valid, errMsg);
   } catch (err) {
-    console.log('\n================================');
-    console.log('Error: %s', err.message);
+    console.log('================================');
+    console.log(error('uncaught error! %s'), err.message);
     dump(phase, sample, test);
-    console.log('\n---------------------------------');
+    console.log('---------------------------------');
     throw err;
   }
 }
 
+function stringify(data) {
+  return JSON.stringify(data, null, 2);
+}
+
 function dump(phase, sample, test, result) {
   console.log('================================');
-  console.log('sample:');
-  console.log(sample);
+  console.log('[X] %s', sample.description);
+  console.log('failed test case:');
+  console.log('  descr: %s', test.description);
+  console.log('  data:  %j', test.data);
+  console.log('expected result: %s', test.valid);
   console.log('---------------------------------');
-  console.log('parser:');
-  console.log(phase);
-  console.log('---------------------------------');
-  console.log('test case:');
-  console.log(test);
+  console.log('parser input (phase schema):')
+  console.log(stringify(phase.raw));
+  console.log('parser output (json schema):');
+  console.log(stringify(phase.schema));
+  console.log('ast:')
+  console.log(stringify(phase.ast));
   if (result) {
     console.log('---------------------------------');
     console.log('result:');
