@@ -54,8 +54,8 @@ function stringify(data) {
 
 function dump(phase, sample, test, result) {
   console.log('================================');
-  console.log('[X] %s', sample.description);
-  console.log('failed test case:');
+  console.log('%s', sample.description);
+  console.log('test case:');
   console.log('  descr: %s', test.description);
   console.log('  data:  %j', test.data);
   console.log('expected result: %s', test.valid);
@@ -73,6 +73,7 @@ function dump(phase, sample, test, result) {
   }
 }
 
+// See samples function
 samples().forEach(sample => {
 
   describe(sample.description, () => {
@@ -86,19 +87,52 @@ samples().forEach(sample => {
 
 });
 
+// Add sample schemas and testcases here.
+//
+// samples() returns an array of sample objects.
+// Each sample object has the following properties:
+// * description, * schema, * tests.
+// The tests property is an array of testcase objects
+// that will be tested against the sample.
+// Each testcase object has the following properties:
+// * description, * test, * valid.
+//
+// sample() and testcase() are helper functions for
+// building the sample and testcase objects.
+//
 // TODO: add more samples!
-function samples() { return [
+function samples() {
+  return [
 
-    // the following tests fail since an empty Phase schema is getting
-    // parsed as an empty string '', which is then transformed to an
-    // undefined (an invalid JSON Schema) ...
-  sample('match anything', "''",
-      testcase('empty string', '""', true),
-      testcase('string', '"foo"', true),
-      testcase('boolean (true)', true, true),
-      testcase('boolean (false)', false, true),
-      testcase('array', [], true),
-      testcase('object', {}, true))
+    sample('empty doc matches anything', "",
+        testcase('empty string', '""', true),
+        testcase('string', '"foo"', true),
+        testcase('boolean (true)', true, true),
+        testcase('boolean (false)', false, true),
+        testcase('array', [], true),
+        testcase('object', {}, true)),
 
-]};
+    sample('{} matches anything', "{}",
+        testcase('empty string', '""', true),
+        testcase('string', '"foo"', true),
+        testcase('boolean (true)', true, true),
+        testcase('boolean (false)', false, true),
+        testcase('array', [], true),
+        testcase('object', {}, true))
 
+  ]
+};
+
+describe('invalid schemas should throw errors', () => {
+
+  function assertThrows(description, schema) {
+    it ('should throw: ' + description, () => {
+      assert.throws(() => {
+        const phase = parse(schema);
+      });
+    });
+  }
+
+  assertThrows('"x" is an invalid schema', 'x');
+
+});

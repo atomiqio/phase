@@ -2,6 +2,7 @@ import parser from './phase-parser';
 import { readFile, readFileSync } from 'fs';
 import ZSchema from 'z-schema';
 import { find } from 'lodash';
+import { format } from 'util';
 
 /**
  * Factory for creating an official JSON Schema validator
@@ -11,9 +12,15 @@ import { find } from 'lodash';
  */
 const validatorFactory = (schema, options) => {
   const zschema = new ZSchema(options);
+  const orig = schema;
 
   if (typeof schema == 'string') {
     schema = JSON.parse(schema);
+  }
+
+  if (typeof schema == 'undefined') {
+    //throw new Error(format('not a valid schema (schema is undefined): %s', orig));
+    schema = {};
   }
 
   return {
@@ -41,6 +48,10 @@ export class Phase {
   static parse(text, options) {
     const phase = new Phase();
 
+    console.log('---------');
+    console.log('parse:');
+    console.log(text);
+
     phase.raw = text;
 
     if (options && options.filename) {
@@ -50,12 +61,14 @@ export class Phase {
 
     try {
       phase.ast = parser.parse(phase.raw);
+      console.log('ast:');
+      console.log(JSON.stringify(phase.ast, null, 2));
     } catch (err) {
       if (err.name == 'SyntaxError' && phase.filename) {
 	      err.filename = phase.filename;
 	      err.filepath = phase.filepath;
       }
-      throw err;
+      throw new Error(format('Invalid schema (delimited with |): |%s|. Detail: %s', text, err.message));
     }
 
     if (options && !options.no_transform) {
@@ -95,10 +108,10 @@ export class Phase {
 
 
     if (!callback) {
-      return Phase.parse(fs.readFileSync(filename, options || { encoding: 'utf8' }), options);
+      return Phase.parse(readFileSync(filename, options || { encoding: 'utf8' }), options);
     }
 
-    fs.readFile(filename, options, function(err, text) {
+    readFile(filename, options, function(err, text) {
       if (err) return callback(err);
 
       try {
