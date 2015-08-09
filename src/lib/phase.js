@@ -156,6 +156,9 @@ const transformers = {
 function transformFromDeclaration(ast) {
 }
 
+/**
+ * @param decl AST declaration tagged 'anonymousDeclaration'
+ */
 function transformFromAnonymousDeclaration(decl) {
 	const schema = jsb.schema();
 	Object.assign(schema, getProps(decl.annotatedType));
@@ -163,19 +166,28 @@ function transformFromAnonymousDeclaration(decl) {
 	return schema.json();
 }
 
+/**
+ * @param value: declaration.annotatedType
+ * @returns schema properties, or undefined
+ */
 function getProps(value) {
 	let result, props;
 
+	// get type or property declarations and any nested annotations
 	const type = getType(value.type);
+	// get base-level annotations
 	const annotations = transformAnnotations(value.annotations);
 
+	// if type and annotations are defined, merge their jsb keywords...
 	if (type && annotations) {
 		props = jsb.schema();
 		props._keywords = type._keywords.concat(annotations._keywords);
 	} else {
+	// ... otherwise use whichever is defined, or leave undefined
 		props = type ? type : annotations;
 	}
 
+	// assign props to valid schema instance
 	if (props) {
 		result = jsb.schema();
 		Object.assign(result, props);
@@ -184,32 +196,44 @@ function getProps(value) {
 	return result;
 }
 
-function getType(obj) {
-	const schema = typeTags[obj.tag] ? jsb.schema() : null;
+/**
+ *
+ * @param type: declaration.annotatedType.type object
+ * @returns valid schema with 'type' property or other declarations, or undefined
+ */
+function getType(type) {
+	const schema = typeTags[type.tag] ? jsb.schema() : null;
 
 	if (schema) {
-		const result = typeTags[obj.tag](obj);
+		const result = typeTags[type.tag](type);
 		Object.assign(schema, result);
 	}
 
 	return schema;
 }
 
+/**
+ * Map declaration.annotatedType.type.tag to associated function
+ */
 const typeTags = {
 	type: simpleTypes,
 	union: simpleTypes,
 	compoundType: compoundType
 };
 
-function simpleTypes(obj) {
+/**
+ * @param type: declaration.annotatedType.type object with 'type' or 'union' tag
+ * @returns {"type": <type/[types]> } or undefined
+ */
+function simpleTypes(type) {
 	const schema = jsb.schema();
 
-	let result = obj.value;
+	let result = type.value;
 
-	if (Array.isArray(obj.value)) {
+	if (Array.isArray(type.value)) {
 		result = [];
 
-		obj.value.forEach(elem => {
+		type.value.forEach(elem => {
 			result.push(elem.value.value);
 		});
 	}
@@ -217,12 +241,17 @@ function simpleTypes(obj) {
 	return schema.type(result);
 }
 
-function compoundType(value) {
+/**
+ * Iterate over declarations and return JSB schema object
+ * @param obj: declaration.annotatedType.type object with 'compoundType' tag
+ */
+function compoundType(obj) {
 	const schema = jsb.schema();
 
-	if (value.declarations.length) {
-		value.declarations.forEach(elem => {
+	if (obj.declarations.length) {
+		obj.declarations.forEach(elem => {
 			if (elem.tag === 'annotation') {
+				// Map to matching jsb method with evaluated arguments
 				schema[elem.name](getAnnotationValue(elem.args));
 			}
 
@@ -241,6 +270,9 @@ function compoundType(value) {
 	return schema;
 }
 
+/**
+ * Map to matching jsb method with evaluated arguments, or return undefined
+ */
 function transformAnnotations(value) {
 	let result;
 
@@ -256,25 +288,39 @@ function transformAnnotations(value) {
 	return result;
 }
 
+/**
+ * Evaluate annotation args array and return correct values
+ */
 function getAnnotationValue(args) {
-	// if no arguments supplied, set default value to empty object
+	// if no arguments supplied, return empty schema object
 	let result = jsb.schema();
 
 	if (args.length) {
 		result = [];
 
 		args.forEach(arg => {
+			// default for string, number, or boolean values
 			let value = arg.value;
 
 			if (typeTags[arg.tag]) {
 				value = getType(arg);
-			} else if (arg.tag === 'annotation') {
+			}
+			else if (arg.tag === 'annotation') {
 				value = transformAnnotations(arg);
-			} else if (arg.tag === 'object') {
-				value = jsb.schema();
-			} else if (arg.tag === 'array' && arg.value.length) {
-				value = [];
-				value.push(getAnnotationValue(arg.value));
+			}
+			else if (arg.tag === 'object') {
+				let obj = jsb.schema();
+
+				if (Object.keys(arg.value).length) {
+					for (let prop in arg.value) {
+						obj[prop] = arg.value[prop].value;
+					}
+				}
+
+				value = obj;
+			} 
+			else if (arg.tag === 'array' && arg.value.length) {
+				value = [ getAnnotationValue(arg.value) ];
 			}
 
 			result.push(value);
