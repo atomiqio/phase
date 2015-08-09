@@ -20,7 +20,7 @@
     "Tony Pujals <tony@subfuzion.com> (http://twitter.com/subfuzion)",
     "Peter Svetlichny (http://twitter.com/p_svetlichny",
     "Henry Allen-Tilford ()"
-    ],
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/atomiqio/phase/issues"
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/atomiqio/phase#readme",
   "dependencies": {
     "babel-runtime": "^5.4.7",
+    "json-schema-builder": "0.0.5",
     "lodash": "^3.10.0",
     "pegjs": "^0.8.0",
     "tv4": "^1.1.9",

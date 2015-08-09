@@ -6,8 +6,9 @@ import { isEqual } from '../helpers';
 
 const samplesDir = join(__dirname, './samples');
 
+// set to true because of unsupported custom annotations ('foo', 'bar', etc.)
 const options = {
-  //no_transform: true
+  no_transform: true
 };
 
 // only want the ast for testing

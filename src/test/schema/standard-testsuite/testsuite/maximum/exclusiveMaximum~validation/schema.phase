@@ -1,4 +1,4 @@
 {
   @maximum(3)
-  @exclusiveMaximum
+  @exclusiveMaximum(true)
 }
