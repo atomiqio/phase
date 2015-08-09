@@ -55,6 +55,7 @@ annotation
 
 argument
   = literal
+  / annotation
   / type
 
 arguments
