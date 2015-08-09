@@ -1,0 +1,3 @@
+{
+	@items(integer, @$ref('#/items/0'))
+}

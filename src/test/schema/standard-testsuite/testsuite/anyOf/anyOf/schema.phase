@@ -1,0 +1,3 @@
+{
+	@anyOf(integer, @minimum(2))
+}
