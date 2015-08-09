@@ -249,8 +249,6 @@ function transformAnnotations(value) {
 	if (value.length) {
 		result = jsb.schema();
 		value.forEach(elem => {
-			console.log(elem);
-		console.log()
 			result[elem.name](getAnnotationValue(elem.args));
 		});
 	}
