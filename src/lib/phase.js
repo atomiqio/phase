@@ -308,6 +308,9 @@ function getAnnotationValue(args) {
 			else if (arg.tag === 'annotation') {
 				value = transformAnnotations(arg);
 			}
+			else if (arg.tag === 'array' && arg.value.length) {
+				value = [ getAnnotationValue(arg.value) ];
+			}
 			else if (arg.tag === 'object') {
 				let obj = jsb.schema();
 
@@ -318,9 +321,6 @@ function getAnnotationValue(args) {
 				}
 
 				value = obj;
-			} 
-			else if (arg.tag === 'array' && arg.value.length) {
-				value = [ getAnnotationValue(arg.value) ];
 			}
 
 			result.push(value);
