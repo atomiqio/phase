@@ -252,7 +252,7 @@ function compoundType(obj) {
 		obj.declarations.forEach(elem => {
 			if (elem.tag === 'annotation') {
 				// Map to matching jsb method with evaluated arguments
-				schema[elem.name](getAnnotationValue(elem.args));
+				schema[elem.name](getArgValue(elem.args));
 			}
 
 			if (elem.tag === 'declaration') {
@@ -281,7 +281,7 @@ function transformAnnotations(value) {
 	if (value.length) {
 		result = jsb.schema();
 		value.forEach(elem => {
-			result[elem.name](getAnnotationValue(elem.args));
+			result[elem.name](getArgValue(elem.args));
 		});
 	}
 
@@ -291,9 +291,9 @@ function transformAnnotations(value) {
 /**
  * Evaluate annotation args array and return correct values
  */
-function getAnnotationValue(args) {
+function getArgValue(args) {
 	// if no arguments supplied, return empty schema object
-	let result = jsb.schema();
+	let result = !args ? jsb.schema() : args;
 
 	if (args.length) {
 		result = [];
@@ -309,14 +309,14 @@ function getAnnotationValue(args) {
 				value = transformAnnotations(arg);
 			}
 			else if (arg.tag === 'array' && arg.value.length) {
-				value = [ getAnnotationValue(arg.value) ];
+				value = [ getArgValue(arg.value) ];
 			}
 			else if (arg.tag === 'object') {
 				let obj = jsb.schema();
 
 				if (Object.keys(arg.value).length) {
 					for (let prop in arg.value) {
-						obj[prop] = arg.value[prop].value;
+						obj[prop] = getArgValue(arg.value[prop].value);
 					}
 				}
 

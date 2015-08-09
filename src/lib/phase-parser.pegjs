@@ -55,8 +55,9 @@ annotation
 
 argument
   = literal
-  / annotation
   / type
+  / compoundType
+  / annotation
 
 arguments
   = "(" ws* arg:argument args:(ws* ',' ws* argument)* ws* ")" {
